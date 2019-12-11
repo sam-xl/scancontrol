@@ -1,0 +1,34 @@
+<library path="src">
+  <class name="gui" type="scancontrol.gui.ScanControlGui" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A Python GUI plugin for displaying an interface for most used setting changes to scancontrol sensor devices.
+    </description>
+    <qtgui>
+      <group>
+        <label>scanCONTROL</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to ME scanCONTROL sensor driver.</statustip>
+      </group>
+      <label>scanCONTROL settings</label>
+      <icon type="theme">applications-other</icon>
+      <statustip>A Python GUI plugin for scancontrol sensor settings.</statustip>
+    </qtgui>
+  </class>
+
+  <class name="manual_settings_gui" type="scancontrol.gui.ScanControlManualSettingsGui" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A Python GUI plugin for displaying an interface for manual setting changes to scancontrol sensor devices.
+    </description>
+    <qtgui>
+      <group>
+        <label>scanCONTROL</label>
+        <icon type="theme">folder</icon>
+        <statustip>Plugins related to ME scanCONTROL sensor driver.</statustip>
+      </group>
+      <label>Manual scanCONTROL settings</label>
+      <icon type="theme">applications-other</icon>
+      <statustip>>A Python GUI plugin for manual scancontrol sensor settings.</statustip>
+    </qtgui>
+  </class>
+
+</library>

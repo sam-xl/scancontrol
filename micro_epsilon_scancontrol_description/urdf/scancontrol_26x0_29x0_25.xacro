@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<robot name="microepsilon_scancontrol_26x0_29x0_25" xmlns:xacro="http://wiki.ros.org/xacro">
+  <xacro:include filename="$(find micro_epsilon_scancontrol_description)/urdf/scancontrol_26x0_29x0_25_macro.xacro"/>
+  <xacro:microepsilon_scancontrol_26x0_29x0_25 prefix=""/>
+</robot>

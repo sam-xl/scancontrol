@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+
+import sys
+
+from scancontrol.gui import ScanControlGui
+from scancontrol.gui import ScanControlManualSettingsGui
+from rqt_gui.main import Main
+
+plugin = 'scancontrol'
+main = Main(filename=plugin)
+sys.exit(main.main(standalone=plugin))

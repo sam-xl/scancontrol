@@ -1,0 +1,3 @@
+<launch>
+  <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find micro_epsilon_scancontrol_description)/urdf/scancontrol_27x0_100.xacro'" />
+</launch>

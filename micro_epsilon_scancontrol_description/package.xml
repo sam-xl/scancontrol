@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package>
+  <name>micro_epsilon_scancontrol_description</name>
+  <version>0.1.0</version>
+  <description>URDFs for the Micro-Epsilon scanCONTROL laser profile sensors.</description>
+  <maintainer email="riktonnaer@hotmail.com">Rik Tonnaer (Delft University of Technology)</maintainer>
+
+  <license>BSD</license> 
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>joint_state_publisher</run_depend>
+  <run_depend>robot_state_publisher</run_depend>
+  <run_depend>rviz</run_depend>
+  <run_depend>xacro</run_depend>
+
+  <export>
+    <architecture_independent />
+  </export>
+</package>

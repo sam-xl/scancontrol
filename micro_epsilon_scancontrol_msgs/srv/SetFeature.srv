@@ -1,0 +1,4 @@
+uint32 setting
+uint32 value
+---
+int32 return_code

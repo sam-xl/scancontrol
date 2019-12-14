@@ -9,10 +9,14 @@ namespace scancontrol_driver
         */   
         nh_         = nh;
         private_nh_ = private_nh;
-        private_nh_.param("serial", config_.serial, std::string(""));
+
+        // Device settings
         private_nh_.param("resolution", config_.resolution, -1);
-        private_nh_.param("topic_name", config_.topic_name, std::string("scancontrol_pointcloud"));
-        private_nh_.param("frame_id", config_.frame_id, std::string("scancontrol"));
+
+        // Multiple device parameters
+        private_nh_.param("serial", config_.serial, std::string(""));
+        private_nh_.param("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
+        private_nh_.param("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
 
         // TODO: Are these parameters needed?
         private_nh_.param("partial_profile_start_point", config_.pp_start_point, 0);
@@ -211,8 +215,15 @@ namespace scancontrol_driver
                 ros::shutdown();
             }
 
-        // Setup topic and service server
-        publisher = nh.advertise<point_cloud_t>(config_.topic_name, 10);
+        // Advertise topic
+        publisher           = nh.advertise<point_cloud_t>(config_.topic_name, 10);
+        
+        // Advertise services
+        get_feature_srv                 = private_nh_.advertiseService("get_feature", &ScanControlDriver::ServiceGetFeature, this);
+        set_feature_srv                 = private_nh_.advertiseService("set_feature", &ScanControlDriver::ServiceSetFeature, this);
+        get_resolution_srv              = private_nh_.advertiseService("get_resolution", &ScanControlDriver::ServiceGetResolution, this);
+        set_resolution_srv              = private_nh_.advertiseService("set_resolution", &ScanControlDriver::ServiceSetResolution, this); 
+        get_available_resolutions_srv   = private_nh_.advertiseService("get_resolutions", &ScanControlDriver::ServiceGetAvailableResolutions, this);
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){

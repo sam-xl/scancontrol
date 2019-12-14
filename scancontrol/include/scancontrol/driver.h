@@ -18,6 +18,9 @@
 #define MAX_RESOLUTION_COUNT 6
 #define GENERAL_FUNCTION_FAILED -1
 
+#define DEFAULT_FRAME_ID "scancontrol"
+#define DEFAULT_TOPIC_NAME "scancontrol_pointcloud"
+
 typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;
 
 namespace scancontrol_driver
@@ -75,6 +78,11 @@ namespace scancontrol_driver
             ros::NodeHandle nh_;
             ros::NodeHandle private_nh_;
             ros::Publisher publisher;
+            ros::ServiceServer get_feature_srv;
+            ros::ServiceServer set_feature_srv;
+            ros::ServiceServer get_resolution_srv;
+            ros::ServiceServer set_resolution_srv;
+            ros::ServiceServer get_available_resolutions_srv;
 
             // Driver objects
             CInterfaceLLT device_interface;

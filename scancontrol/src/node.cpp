@@ -11,12 +11,11 @@ int main(int argc, char** argv)
     scancontrol_driver::ScanControlDriver driver(node, private_nh);
 
     // Start services
-    ros::ServiceServer service = node.advertiseService("scancontrol_settings_service_" + driver.serial(), &scancontrol_driver::ScanControlDriver::ServiceSetFeature, &driver);
-    ros::ServiceServer get_feature_srv = node.advertiseService("scancontrol_get_feature", &scancontrol_driver::ScanControlDriver::ServiceGetFeature, &driver);
-    ros::ServiceServer set_feature_srv = node.advertiseService("scancontrol_set_feature", &scancontrol_driver::ScanControlDriver::ServiceSetFeature, &driver);
-    ros::ServiceServer get_resolution_srv = node.advertiseService("scancontrol_get_resolution", &scancontrol_driver::ScanControlDriver::ServiceGetResolution, &driver);
-    ros::ServiceServer set_resolution_srv = node.advertiseService("scancontrol_set_resolution", &scancontrol_driver::ScanControlDriver::ServiceSetResolution, &driver); 
-    ros::ServiceServer get_resolutions_srv = node.advertiseService("scancontrol_get_resolutions", &scancontrol_driver::ScanControlDriver::ServiceGetResolutions, &driver);
+    ros::ServiceServer get_feature_srv = private_nh.advertiseService("get_feature", &scancontrol_driver::ScanControlDriver::ServiceGetFeature, &driver);
+    ros::ServiceServer set_feature_srv = private_nh.advertiseService("set_feature", &scancontrol_driver::ScanControlDriver::ServiceSetFeature, &driver);
+    ros::ServiceServer get_resolution_srv = private_nh.advertiseService("get_resolution", &scancontrol_driver::ScanControlDriver::ServiceGetResolution, &driver);
+    ros::ServiceServer set_resolution_srv = private_nh.advertiseService("set_resolution", &scancontrol_driver::ScanControlDriver::ServiceSetResolution, &driver); 
+    ros::ServiceServer get_available_resolutions_srv = private_nh.advertiseService("get_available_resolutions", &scancontrol_driver::ScanControlDriver::ServiceGetAvailableResolutions, &driver);
 
     //
     ROS_INFO("Driver started");

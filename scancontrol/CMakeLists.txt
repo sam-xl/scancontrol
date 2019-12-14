@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(scancontrol)
 
-find_package(catkin REQUIRED COMPONENTS roscpp rospy rqt_gui rqt_gui_py pcl_ros nodelet message_generation)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy rqt_gui rqt_gui_py pcl_ros nodelet micro_epsilon_scancontrol_msgs)
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(glib2 REQUIRED glib-2.0)
@@ -16,23 +16,11 @@ set(mescan_LIBRARIES /usr/local/lib/libmescan.so)
 #find_package(aravis REQUIRED)
 #find_package(glib2 REQUIRED)
 
-add_service_files(
-  FILES 
-  ScanControlSettingsService.srv
-  SetResolution.srv
-  GetResolutions.srv
-  GetResolution.srv
-  SetFeature.srv
-  GetFeature.srv
-)
-
 catkin_python_setup()
-
-generate_messages(DEPENDENCIES std_msgs)
 
 catkin_package(
   INCLUDE_DIRS include
-  CATKIN_DEPENDS roscpp rospy rqt_gui rqt_gui_py pcl_ros nodelet message_runtime
+  CATKIN_DEPENDS roscpp rospy rqt_gui rqt_gui_py pcl_ros nodelet micro_epsilon_scancontrol_msgs
   DEPENDS aravis glib2
 )
 

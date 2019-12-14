@@ -5,12 +5,11 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 
-#include <scancontrol/ScanControlSettingsService.h>
-#include <scancontrol/GetFeature.h>
-#include <scancontrol/SetFeature.h>
-#include <scancontrol/GetResolution.h>
-#include <scancontrol/SetResolution.h>
-#include <scancontrol/GetResolutions.h>
+#include <micro_epsilon_scancontrol_msgs/GetFeature.h>
+#include <micro_epsilon_scancontrol_msgs/SetFeature.h>
+#include <micro_epsilon_scancontrol_msgs/GetResolution.h>
+#include <micro_epsilon_scancontrol_msgs/SetResolution.h>
+#include <micro_epsilon_scancontrol_msgs/GetAvailableResolutions.h>
 
 #include <llt.h>
 #include <mescan.h>
@@ -45,12 +44,11 @@ namespace scancontrol_driver
             int resolution() const {return config_.resolution;};
 
             // Service Callback
-            //bool ServiceSetFeature(scancontrol::ScanControlSettingsService::Request &request, scancontrol::ScanControlSettingsService::Response &response);
-            bool ServiceSetFeature(scancontrol::SetFeature::Request &request, scancontrol::SetFeature::Response &response);
-            bool ServiceGetFeature(scancontrol::GetFeature::Request &request, scancontrol::GetFeature::Response &response);
-            bool ServiceSetResolution(scancontrol::SetResolution::Request &request, scancontrol::SetResolution::Response &response);
-            bool ServiceGetResolution(scancontrol::GetResolution::Request &request, scancontrol::GetResolution::Response &response);
-            bool ServiceGetResolutions(scancontrol::GetResolutions::Request &request, scancontrol::GetResolutions::Response &response);
+            bool ServiceSetFeature(micro_epsilon_scancontrol_msgs::SetFeature::Request &request, micro_epsilon_scancontrol_msgs::SetFeature::Response &response);
+            bool ServiceGetFeature(micro_epsilon_scancontrol_msgs::GetFeature::Request &request, micro_epsilon_scancontrol_msgs::GetFeature::Response &response);
+            bool ServiceSetResolution(micro_epsilon_scancontrol_msgs::SetResolution::Request &request, micro_epsilon_scancontrol_msgs::SetResolution::Response &response);
+            bool ServiceGetResolution(micro_epsilon_scancontrol_msgs::GetResolution::Request &request, micro_epsilon_scancontrol_msgs::GetResolution::Response &response);
+            bool ServiceGetAvailableResolutions(micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Request &request, micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Response &response);
 
         private:
             // Profile functions
@@ -76,7 +74,6 @@ namespace scancontrol_driver
             // ROS handles
             ros::NodeHandle nh_;
             ros::NodeHandle private_nh_;
-            ros::ServiceServer service_server;
             ros::Publisher publisher;
 
             // Driver objects

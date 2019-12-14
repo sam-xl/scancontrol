@@ -9,13 +9,12 @@ namespace scancontrol_driver
         */   
         nh_         = nh;
         private_nh_ = private_nh;
-        if (!private_nh_.getParam("frame_id", config_.frame_id)){
-            ROS_FATAL("Parameter 'frame_id' is missing. Cannot continue.");
-            ros::shutdown();
-        }
         private_nh_.param("serial", config_.serial, std::string(""));
         private_nh_.param("resolution", config_.resolution, -1);
         private_nh_.param("topic_name", config_.topic_name, std::string("scancontrol_pointcloud"));
+        private_nh_.param("frame_id", config_.frame_id, std::string("scancontrol"));
+
+        // TODO: Are these parameters needed?
         private_nh_.param("partial_profile_start_point", config_.pp_start_point, 0);
         private_nh_.param("partial_profile_start_point_data", config_.pp_start_point_data, 4);
         private_nh_.param("partial_profile_point_count", config_.pp_point_count, -1);
@@ -32,7 +31,7 @@ namespace scancontrol_driver
                 for. If 6 devices is insufficient, redefine MAX_LLT_INTERFACE_COUNT to 
                 accomodate the additional devices.
         */
-        gint32 return_code     = 0;
+        gint32 return_code      = 0;
         gint32 interface_count  = 0;
         std::vector<char *> available_interfaces(MAX_DEVICE_INTERFACE_COUNT);
 
@@ -239,23 +238,22 @@ namespace scancontrol_driver
             ROS_WARN_STREAM("Error while setting partial profile settings. Code: " << return_code);
             return GENERAL_FUNCTION_FAILED;
         }
-        else{
-            // Resize buffers - values contain less than the point count, due to the timestamp data
-            profile_buffer.resize(t_partial_profile_.nPointCount*t_partial_profile_.nPointDataWidth);
-            lost_values = (16 + t_partial_profile_.nPointDataWidth - 1)/t_partial_profile_.nPointDataWidth;
-            value_x.resize(t_partial_profile_.nPointCount);
-            value_z.resize(t_partial_profile_.nPointCount);
-            ROS_INFO_STREAM("Profile is losing " << std::to_string(lost_values) << " values due to timestamp of 16 byte at the end of the profile.");
 
-            // Prepare new point cloud message
-            point_cloud_msg.reset(new point_cloud_t);
-            point_cloud_msg->header.frame_id = config_.frame_id;
-            point_cloud_msg->height = 1;
-            point_cloud_msg->width = config_.resolution;
-            for (int i=0; i<config_.resolution; i++){
-                pcl::PointXYZI point(1.0);
-                point_cloud_msg->points.push_back(point);
-            }
+        // Resize buffers - values contain less than the point count, due to the timestamp data
+        profile_buffer.resize(t_partial_profile_.nPointCount*t_partial_profile_.nPointDataWidth);
+        lost_values = (16 + t_partial_profile_.nPointDataWidth - 1)/t_partial_profile_.nPointDataWidth;
+        value_x.resize(t_partial_profile_.nPointCount);
+        value_z.resize(t_partial_profile_.nPointCount);
+        ROS_INFO_STREAM("Profile is losing " << std::to_string(lost_values) << " values due to timestamp of 16 byte at the end of the profile.");
+
+        // Prepare new point cloud message
+        point_cloud_msg.reset(new point_cloud_t);
+        point_cloud_msg->header.frame_id = config_.frame_id;
+        point_cloud_msg->height = 1;
+        point_cloud_msg->width = config_.resolution;
+        for (int i=0; i<config_.resolution; i++){
+            pcl::PointXYZI point(1.0);
+            point_cloud_msg->points.push_back(point);
         }
 
         return GENERAL_FUNCTION_OK;
@@ -358,19 +356,19 @@ namespace scancontrol_driver
     }
 
     /* Wrapper of the SetFeature call for use by the ServiceSetFeature service */
-    bool ScanControlDriver::ServiceSetFeature(scancontrol::SetFeature::Request &request, scancontrol::SetFeature::Response &response){
+    bool ScanControlDriver::ServiceSetFeature(micro_epsilon_scancontrol_msgs::SetFeature::Request &request, micro_epsilon_scancontrol_msgs::SetFeature::Response &response){
         response.return_code = ScanControlDriver::SetFeature(request.setting, request.value);
         return true;
     }
 
     /* Wrapper of the GetFeature call for use by the ServiceGetFeature service */
-    bool ScanControlDriver::ServiceGetFeature(scancontrol::GetFeature::Request &request, scancontrol::GetFeature::Response &response){
+    bool ScanControlDriver::ServiceGetFeature(micro_epsilon_scancontrol_msgs::GetFeature::Request &request, micro_epsilon_scancontrol_msgs::GetFeature::Response &response){
         response.return_code = ScanControlDriver::GetFeature(request.setting, &(response.value));
         return true;
     }
 
     /* Wrapper of the SetResolution call for use by the ServiceSetResolution service */
-    bool ScanControlDriver::ServiceSetResolution(scancontrol::SetResolution::Request &request, scancontrol::SetResolution::Response &response){
+    bool ScanControlDriver::ServiceSetResolution(micro_epsilon_scancontrol_msgs::SetResolution::Request &request, micro_epsilon_scancontrol_msgs::SetResolution::Response &response){
         if (response.return_code = StopProfileTransfer() < GENERAL_FUNCTION_OK){
             return true;
         }
@@ -393,13 +391,13 @@ namespace scancontrol_driver
     }
 
     /* Wrapper of the GetResolution call for use by the ServiceGetResolution service */
-    bool ScanControlDriver::ServiceGetResolution(scancontrol::GetResolution::Request &request, scancontrol::GetResolution::Response &response){
+    bool ScanControlDriver::ServiceGetResolution(micro_epsilon_scancontrol_msgs::GetResolution::Request &request, micro_epsilon_scancontrol_msgs::GetResolution::Response &response){
         response.return_code = device_interface.GetResolution(&(response.resolution));
         return true;
     }
     
-    /* Wrapper of the GetResolutions call for use by the ServiceGetResolutions service */
-    bool ScanControlDriver::ServiceGetResolutions(scancontrol::GetResolutions::Request &request, scancontrol::GetResolutions::Response &response){
+    /* Wrapper of the GetResolutions call for use by the ServiceGetAvailableResolutions service */
+    bool ScanControlDriver::ServiceGetAvailableResolutions(micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Request &request, micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Response &response){
         guint32 available_resolutions[MAX_RESOLUTION_COUNT] = {0};
         response.return_code = device_interface.GetResolutions(&available_resolutions[0], MAX_RESOLUTION_COUNT);
         for (int i = 0; i < MAX_RESOLUTION_COUNT; i++){

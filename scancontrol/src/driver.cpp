@@ -211,8 +211,7 @@ namespace scancontrol_driver
         // goto location when initialization fails
         stop_initialization:            
             if (!initialized_) {
-                ROS_INFO("ScanControlDriver initialization failed.");
-                ros::shutdown();
+                throw std::runtime_error("ScanControlDriver: Initialization failed.");
             }
 
         // Advertise topic

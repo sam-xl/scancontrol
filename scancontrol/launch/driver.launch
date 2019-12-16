@@ -9,7 +9,7 @@
     <arg name="partial_profile_data_width" default="4" />
     <arg name="use_callback" default="true" />
 
-    <node name="scancontrol_1" pkg="scancontrol" type="driver_node" output="screen">
+    <node name="scancontrol_1" pkg="scancontrol" type="driver_node" output="screen" required="true">
         <param name="frame_id" type="str" value="$(arg frame_id)"/>
         <param name="serial" type="str" value="$(arg serial)" />
         <param name="topic_name" type="str" value="$(arg topic_name)" />

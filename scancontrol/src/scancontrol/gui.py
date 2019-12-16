@@ -8,8 +8,7 @@ from rospy.exceptions import ROSException, ROSInterruptException
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QLineEdit, QLineEdit, QPushButton, QMessageBox
 from qt_gui.plugin import Plugin
-from scancontrol.srv import ScanControlSettingsService
-from scancontrol.srv import SetResolution, GetResolutions, GetResolution, SetFeature, GetFeature
+from micro_epsilon_scancontrol_msgs.srv import GetAvailableResolutions, SetResolution, GetResolution, SetFeature, GetFeature
 
 class ScanControlGui(Plugin):
 
@@ -40,20 +39,20 @@ class ScanControlGui(Plugin):
 
         # Setup service handles
         try:
-            rospy.wait_for_service('scancontrol_set_resolution', timeout=5)
-            self.set_resolution = rospy.ServiceProxy('scancontrol_set_resolution', SetResolution)
+            rospy.wait_for_service('set_resolution', timeout=5)
+            self.set_resolution = rospy.ServiceProxy('set_resolution', SetResolution)
 
-            rospy.wait_for_service('scancontrol_get_resolutions', timeout=5)
-            self.get_resolutions = rospy.ServiceProxy('scancontrol_get_resolutions', GetResolutions)
+            rospy.wait_for_service('get_available_resolutions', timeout=5)
+            self.get_available_resolutions = rospy.ServiceProxy('get_available_resolutions', GetAvailableResolutions)
         
-            rospy.wait_for_service('scancontrol_get_resolution', timeout=5)
-            self.get_resolution = rospy.ServiceProxy('scancontrol_get_resolution', GetResolution)
+            rospy.wait_for_service('get_resolution', timeout=5)
+            self.get_resolution = rospy.ServiceProxy('get_resolution', GetResolution)
           
-            rospy.wait_for_service('scancontrol_set_feature', timeout=5)
-            self.set_feature = rospy.ServiceProxy('scancontrol_set_feature', SetFeature)
+            rospy.wait_for_service('set_feature', timeout=5)
+            self.set_feature = rospy.ServiceProxy('set_feature', SetFeature)
             
-            rospy.wait_for_service('scancontrol_get_feature', timeout=5)
-            self.get_feature = rospy.ServiceProxy('scancontrol_get_feature', GetFeature)
+            rospy.wait_for_service('get_feature', timeout=5)
+            self.get_feature = rospy.ServiceProxy('get_feature', GetFeature)
         
         except (ROSException, ROSInterruptException):
             rospy.logfatal('Failed to find scanCONTROL services. Make sure the scancontrol node is up and running.')
@@ -65,7 +64,7 @@ class ScanControlGui(Plugin):
         self.scanner_type = response.value
 
         # Query available and current resolution:
-        response = self.get_resolutions()
+        response = self.get_available_resolutions()
         self.resolutions_list = response.resolutions
         if response.return_code < 0:
             rospy.logfatal('Failed to retrieve available resolutions. Error code: ' + str(response.return_code))

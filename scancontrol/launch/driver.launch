@@ -20,6 +20,4 @@
         <param name="partial_profile_data_width" type="int" value="$(arg partial_profile_data_width)" />
         <param name="use_callback" type="bool" value="$(arg use_callback)" />
     </node>
-
-    <node name = "my_rqt_dashboard" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" args = "--perspective-file $(find scancontrol)/rqt_config/rqt.perspective"/>
 </launch>

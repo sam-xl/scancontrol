@@ -5,8 +5,7 @@
     <arg name="resolution" default="-1" />
     <arg name="sim" default="true" />
 
-
-    <node name="micro_espilon_scancontrol_driver" pkg="scancontrol" type="driver_node" output="screen">
+    <node name="micro_epsilon_scancontrol_driver" pkg="scancontrol" type="driver_node" output="screen">
         <param name="frame_id" type="str" value="$(arg frame_id)"/>
         <param name="serial" type="str" value="$(arg serial)" />
         <param name="topic_name" type="str" value="$(arg topic_name)" />
@@ -16,7 +15,6 @@
 
     <node name = "rqt_scancontrol_gui" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" args = "--perspective-file $(find scancontrol)/rqt_config/rqt.perspective"/>
 
-    
     <include file="$(find micro_epsilon_scancontrol_description)/launch/load_scancontrol_26x0_29x0_25.launch" />
     <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
         <param name="use_gui" value="false" />

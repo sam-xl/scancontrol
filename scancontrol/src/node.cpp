@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "micro_espilon_scancontrol_node");
+    ros::init(argc, argv, "micro_epsilon_scancontrol_node");
     ros::NodeHandle node;
     ros::NodeHandle private_nh("~");
     

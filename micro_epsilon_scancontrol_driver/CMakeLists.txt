@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(scancontrol)
+project(micro_epsilon_scancontrol_driver)
 
 find_package(catkin REQUIRED COMPONENTS roscpp rospy rqt_gui rqt_gui_py pcl_ros nodelet micro_epsilon_scancontrol_msgs)
 find_package(PkgConfig REQUIRED)

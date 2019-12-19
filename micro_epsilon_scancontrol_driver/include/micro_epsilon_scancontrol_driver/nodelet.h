@@ -8,8 +8,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <nodelet/nodelet.h>
 
-#include "scancontrol/nodelet.h"
-#include "scancontrol/driver.h"
+#include "micro_epsilon_scancontrol_driver/nodelet.h"
+#include "micro_epsilon_scancontrol_driver/driver.h"
 
 namespace scancontrol_driver
 {

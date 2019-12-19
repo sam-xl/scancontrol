@@ -1,4 +1,4 @@
-#include "scancontrol/driver.h"
+#include "micro_epsilon_scancontrol_driver/driver.h"
 
 namespace scancontrol_driver
 {

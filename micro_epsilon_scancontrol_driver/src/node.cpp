@@ -1,9 +1,9 @@
 #include <ros/ros.h>
-#include "scancontrol/driver.h"
+#include "micro_epsilon_scancontrol_driver/driver.h"
 
 int main(int argc, char** argv)
 {
-    ros::init(argc, argv, "micro_epsilon_scancontrol_node");
+    ros::init(argc, argv, "micro_epsilon_scancontrol_driver_node");
     ros::NodeHandle node;
     ros::NodeHandle private_nh("~");
     
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     }
     catch(const std::runtime_error& error)
     {
-        ROS_FATAL(error.what());
+        ROS_FATAL_STREAM(error.what());
         ros::shutdown();
         return 0;
     }

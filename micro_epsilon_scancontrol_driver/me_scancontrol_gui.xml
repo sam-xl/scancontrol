@@ -1,5 +1,5 @@
-<library path="src">
-  <class name="gui" type="scancontrol.gui.ScanControlGui" base_class_type="rqt_gui_py::Plugin">
+<library path="scripts">
+  <class name="gui" type="micro_epsilon_scancontrol_driver.gui.ScanControlGui" base_class_type="rqt_gui_py::Plugin">
     <description>
       A Python GUI plugin for displaying an interface for most used setting changes to scancontrol sensor devices.
     </description>
@@ -15,7 +15,7 @@
     </qtgui>
   </class>
 
-  <class name="manual_settings_gui" type="scancontrol.gui.ScanControlManualSettingsGui" base_class_type="rqt_gui_py::Plugin">
+  <class name="manual_settings_gui" type="micro_epsilon_scancontrol_driver.gui.ScanControlManualSettingsGui" base_class_type="rqt_gui_py::Plugin">
     <description>
       A Python GUI plugin for displaying an interface for manual setting changes to scancontrol sensor devices.
     </description>

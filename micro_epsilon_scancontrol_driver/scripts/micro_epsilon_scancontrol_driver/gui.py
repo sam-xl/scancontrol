@@ -29,7 +29,7 @@ class ScanControlGui(Plugin):
 
         # Create QWidget
         self._widget = QWidget()
-        ui_file = os.path.join(rospkg.RosPack().get_path('scancontrol'), 'resource', 'me_scancontrol_gui.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('micro_epsilon_scancontrol_driver'), 'resource', 'me_scancontrol_gui.ui')
 
         # Load ui file in QWidget
         loadUi(ui_file, self._widget)
@@ -56,7 +56,8 @@ class ScanControlGui(Plugin):
         
         except (ROSException, ROSInterruptException):
             rospy.logfatal('Failed to find scanCONTROL services. Make sure the scancontrol node is up and running.')
-
+            return
+            
         # Query sensor type
         response = self.get_feature(self.ID_SCANNER_TYPE)
         if response.return_code < 0:
@@ -312,7 +313,7 @@ class ScanControlManualSettingsGui(Plugin):
 
         # Create QWidget
         self._widget = QWidget()
-        ui_file = os.path.join(rospkg.RosPack().get_path('scancontrol'), 'resource', 'manual_settings.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('micro_epsilon_scancontrol_driver'), 'resource', 'me_scancontrol_gui_manual_settings.ui')
 
         # Load ui file in QWidget
         loadUi(ui_file, self._widget)

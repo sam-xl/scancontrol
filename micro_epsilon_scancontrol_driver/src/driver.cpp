@@ -222,7 +222,7 @@ namespace scancontrol_driver
         set_feature_srv                 = private_nh_.advertiseService("set_feature", &ScanControlDriver::ServiceSetFeature, this);
         get_resolution_srv              = private_nh_.advertiseService("get_resolution", &ScanControlDriver::ServiceGetResolution, this);
         set_resolution_srv              = private_nh_.advertiseService("set_resolution", &ScanControlDriver::ServiceSetResolution, this); 
-        get_available_resolutions_srv   = private_nh_.advertiseService("get_resolutions", &ScanControlDriver::ServiceGetAvailableResolutions, this);
+        get_available_resolutions_srv   = private_nh_.advertiseService("get_available_resolutions", &ScanControlDriver::ServiceGetAvailableResolutions, this);
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){

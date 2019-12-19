@@ -1,4 +1,4 @@
-#include "scancontrol/nodelet.h"
+#include "micro_epsilon_scancontrol_driver/nodelet.h"
 
 // Register this plugin with pluginlib.  
 PLUGINLIB_EXPORT_CLASS(scancontrol_driver::DriverNodelet, nodelet::Nodelet)

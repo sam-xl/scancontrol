@@ -62,7 +62,7 @@ Run the unit tests with
 
 Run the main driver node with:
 
-	roslaunch micro_epsilon_scancontrol driver.launch
+	roslaunch micro_epsilon_scancontrol_driver load_driver.launch
 
 <!-- ## Config files
 

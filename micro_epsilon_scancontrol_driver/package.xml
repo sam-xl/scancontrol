@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>scancontrol</name>
+  <name>micro_epsilon_scancontrol_driver</name>
   <version>0.0.1</version>
   <description>Micro Espsilon scanCONTROL sensor driver</description>
   <maintainer email="r.tonnear@tudelft.nl">Rik Tonnear</maintainer>
   <maintainer email="d.kroezen@tudelft.nl">Dave Kroezen</maintainer>
 
-  <url type="repository">https://gitlab.tudelft.nl/dasml/micro_epsilon_scancontrol</url>
+  <url type="repository">https://github.com/sam-xl/scancontrol</url>
 
-  <license>BSD</license>
+  <license>Apache 2.0</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   
@@ -23,7 +23,7 @@
   <depend>micro_epsilon_scancontrol_msgs</depend>
 
   <export>
-    <nodelet plugin="${prefix}/nodelet_scancontrol.xml"/>
+    <nodelet plugin="${prefix}/me_scancontrol_nodelet.xml"/>
     <rqt_gui plugin="${prefix}/me_scancontrol_gui.xml"/>
   </export>
 </package>

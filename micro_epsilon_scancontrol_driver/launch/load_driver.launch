@@ -1,0 +1,4 @@
+<launch>
+    <!-- Load the Micro Epsilon scanCONTROL driver -->
+    <node name="scancontrol_driver" pkg="micro_epsilon_scancontrol_driver" type="driver_node" output="screen" required="true" />
+</launch>

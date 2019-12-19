@@ -29,7 +29,7 @@ class ScanControlGui(Plugin):
 
         # Create QWidget
         self._widget = QWidget()
-        ui_file = os.path.join(rospkg.RosPack().get_path('scancontrol'), 'resource', 'me_scancontrol_gui.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('micro_epsilon_scancontrol_driver'), 'resource', 'me_scancontrol_gui.ui')
 
         # Load ui file in QWidget
         loadUi(ui_file, self._widget)
@@ -39,29 +39,33 @@ class ScanControlGui(Plugin):
 
         # Setup service handles
         try:
-            rospy.wait_for_service('set_resolution', timeout=5)
-            self.set_resolution = rospy.ServiceProxy('set_resolution', SetResolution)
+            ns = 'scancontrol_driver'
+            rospy.wait_for_service(ns + '/set_resolution', timeout=5)
+            self.set_resolution = rospy.ServiceProxy(ns + '/set_resolution', SetResolution)
 
-            rospy.wait_for_service('get_available_resolutions', timeout=5)
-            self.get_available_resolutions = rospy.ServiceProxy('get_available_resolutions', GetAvailableResolutions)
-        
-            rospy.wait_for_service('get_resolution', timeout=5)
-            self.get_resolution = rospy.ServiceProxy('get_resolution', GetResolution)
-          
-            rospy.wait_for_service('set_feature', timeout=5)
-            self.set_feature = rospy.ServiceProxy('set_feature', SetFeature)
-            
-            rospy.wait_for_service('get_feature', timeout=5)
-            self.get_feature = rospy.ServiceProxy('get_feature', GetFeature)
-        
+            rospy.wait_for_service(ns + '/get_available_resolutions', timeout=5)
+            self.get_available_resolutions = rospy.ServiceProxy(ns + '/get_available_resolutions', GetAvailableResolutions)
+
+            rospy.wait_for_service(ns + '/get_resolution', timeout=5)
+            self.get_resolution = rospy.ServiceProxy(ns + '/get_resolution', GetResolution)
+
+            rospy.wait_for_service(ns + '/set_feature', timeout=5)
+            self.set_feature = rospy.ServiceProxy(ns + '/set_feature', SetFeature)
+
+            rospy.wait_for_service(ns + '/get_feature', timeout=5)
+            self.get_feature = rospy.ServiceProxy(ns + '/get_feature', GetFeature)
+
         except (ROSException, ROSInterruptException):
             rospy.logfatal('Failed to find scanCONTROL services. Make sure the scancontrol node is up and running.')
-
+            return
+            
         # Query sensor type
         response = self.get_feature(self.ID_SCANNER_TYPE)
         if response.return_code < 0:
             rospy.logfatal('Failed to retrieve available resolutions. Error code: ' + str(response.return_code))
         self.scanner_type = response.value
+        print("scanner_type: " + str(self.scanner_type))
+        print("return_code: " + str(response.return_code))
 
         # Query available and current resolution:
         response = self.get_available_resolutions()
@@ -312,7 +316,7 @@ class ScanControlManualSettingsGui(Plugin):
 
         # Create QWidget
         self._widget = QWidget()
-        ui_file = os.path.join(rospkg.RosPack().get_path('scancontrol'), 'resource', 'manual_settings.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('micro_epsilon_scancontrol_driver'), 'resource', 'me_scancontrol_gui_manual_settings.ui')
 
         # Load ui file in QWidget
         loadUi(ui_file, self._widget)

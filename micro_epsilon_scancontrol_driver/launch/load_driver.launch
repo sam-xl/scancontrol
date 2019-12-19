@@ -1,23 +1,4 @@
 <launch>
-    <arg name="frame_id" default="scancontrol" />
-    <arg name="serial" default="" />
-    <arg name="topic_name" default="scancontrol_pointcloud" />
-    <arg name="resolution" default="-1" />
-    <arg name="partial_profile_start_point" default="0" />
-    <arg name="partial_profile_start_point_data" default="4" />
-    <arg name="partial_profile_point_count" default="-1" />
-    <arg name="partial_profile_data_width" default="4" />
-    <arg name="use_callback" default="true" />
-
-    <node name="scancontrol_1" pkg="scancontrol" type="driver_node" output="screen" required="true">
-        <param name="frame_id" type="str" value="$(arg frame_id)"/>
-        <param name="serial" type="str" value="$(arg serial)" />
-        <param name="topic_name" type="str" value="$(arg topic_name)" />
-        <param name="resolution" type="int" value="$(arg resolution)" />
-        <param name="partial_profile_start_point" type="int" value="$(arg partial_profile_start_point)" />
-        <param name="partial_profile_start_point_data" type="int" value="$(arg partial_profile_start_point_data)" />
-        <param name="partial_profile_point_count" type="int" value="$(arg partial_profile_point_count)" />
-        <param name="partial_profile_data_width" type="int" value="$(arg partial_profile_data_width)" />
-        <param name="use_callback" type="bool" value="$(arg use_callback)" />
-    </node>
+    <!-- Load the Micro Epsilon scanCONTROL driver -->
+    <node name="scancontrol_driver" pkg="micro_epsilon_scancontrol_driver" type="driver_node" output="screen" required="true" />
 </launch>

@@ -418,6 +418,86 @@ namespace scancontrol_driver
         return true;
     }
 
+    /* 
+    Enable or disable the inversion of Z values on the scanCONTROL device:
+        If request.data == true > Enable the inversion of Z values on the scanCONTROL device. (Default of the scanCONTROL device)
+        If request.data == false > Disable the inversion of Z values on the scanCONTROL device.
+    */
+    bool ScanControlDriver::ServiceInvertZ(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response)
+    {   
+        unsigned int value;
+        int return_code; 
+
+        // Retrieve current settings
+        if (return_code = ScanControlDriver::GetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA ,&value) < GENERAL_FUNCTION_OK)
+        {   
+            // Failed to get PROCESSING feature
+            response.success = false;
+            response.message = std::string("Failed to get 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
+            return true;
+        }
+
+        // Set 6th bit according to the SetBool service request
+        value = current_processing_id & ~(1<<6);
+        if (request.data) 
+        {
+            value |= (1<<6);
+        }
+
+        // Send the updated settings 
+        if (return_code = ScanControlDriver::SetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA, value) < GENERAL_FUNCTION_OK)
+        {
+            // Failed to set PROCESSING feature
+            response.success = false;
+            response.message = std::string("Failed to set 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
+            return true;
+        }
+
+        response.success = true;
+
+        return true;
+    }  
+
+    /* 
+    Enable or disable the inversion of X values on the scanCONTROL device:
+        If request.data == true > Enable the inversion of X values on the scanCONTROL device. (Default of the scanCONTROL device)
+        If request.data == false > Disable the inversion of X values on the scanCONTROL device.
+    */
+    bool ScanControlDriver::ServiceInvertX(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response)
+    {   
+        unsigned int value;
+        int return_code; 
+
+        // Retrieve current settings
+        if (return_code = ScanControlDriver::GetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA ,&value) < GENERAL_FUNCTION_OK)
+        {   
+            // Failed to get PROCESSING feature
+            response.success = false;
+            response.message = std::string("Failed to get 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
+            return true;
+        }
+
+        // Set 6th bit according to the SetBool service request
+        value = current_processing_id & ~(1<<7);
+        if (request.data) 
+        {
+            value |= (1<<7);
+        }
+
+        // Send the updated settings 
+        if (return_code = ScanControlDriver::SetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA, value) < GENERAL_FUNCTION_OK)
+        {
+            // Failed to set PROCESSING feature
+            response.success = false;
+            response.message = std::string("Failed to set 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
+            return true;
+        }
+
+        response.success = true;
+
+        return true;
+    }  
+
     /* Callback for when a new profile is read, for use with the scanCONTROL API. */
     void NewProfileCallback(const void * data, size_t data_size, gpointer user_data){
         // Cast user_data to a driver class pointer and process and publish point cloud

@@ -5,6 +5,7 @@
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 
+#include <std_srvs/SetBool.h>
 #include <micro_epsilon_scancontrol_msgs/GetFeature.h>
 #include <micro_epsilon_scancontrol_msgs/SetFeature.h>
 #include <micro_epsilon_scancontrol_msgs/GetResolution.h>
@@ -52,7 +53,9 @@ namespace scancontrol_driver
             bool ServiceSetResolution(micro_epsilon_scancontrol_msgs::SetResolution::Request &request, micro_epsilon_scancontrol_msgs::SetResolution::Response &response);
             bool ServiceGetResolution(micro_epsilon_scancontrol_msgs::GetResolution::Request &request, micro_epsilon_scancontrol_msgs::GetResolution::Response &response);
             bool ServiceGetAvailableResolutions(micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Request &request, micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Response &response);
-
+            bool ServiceInvertZ(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response);
+            bool ServiceInvertX(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response);
+    
         private:
             // Profile functions
             int Profile2PointCloud();

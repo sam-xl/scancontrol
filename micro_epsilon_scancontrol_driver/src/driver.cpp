@@ -223,6 +223,8 @@ namespace scancontrol_driver
         get_resolution_srv              = private_nh_.advertiseService("get_resolution", &ScanControlDriver::ServiceGetResolution, this);
         set_resolution_srv              = private_nh_.advertiseService("set_resolution", &ScanControlDriver::ServiceSetResolution, this); 
         get_available_resolutions_srv   = private_nh_.advertiseService("get_available_resolutions", &ScanControlDriver::ServiceGetAvailableResolutions, this);
+        invert_z_srv                    = private_nh_.advertiseService("invert_z", &ScanControlDriver::ServiceInvertZ, this);
+        invert_x_srv                    = private_nh_.advertiseService("invert_x", &ScanControlDriver::ServiceInvertX, this);
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){
@@ -438,7 +440,7 @@ namespace scancontrol_driver
         }
 
         // Set 6th bit according to the SetBool service request
-        value = current_processing_id & ~(1<<6);
+        value = value & ~(1<<6);
         if (request.data) 
         {
             value |= (1<<6);
@@ -478,7 +480,7 @@ namespace scancontrol_driver
         }
 
         // Set 6th bit according to the SetBool service request
-        value = current_processing_id & ~(1<<7);
+        value = value & ~(1<<7);
         if (request.data) 
         {
             value |= (1<<7);

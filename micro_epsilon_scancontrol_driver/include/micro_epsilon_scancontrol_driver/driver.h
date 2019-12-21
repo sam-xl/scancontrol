@@ -86,6 +86,9 @@ namespace scancontrol_driver
             ros::ServiceServer get_resolution_srv;
             ros::ServiceServer set_resolution_srv;
             ros::ServiceServer get_available_resolutions_srv;
+            ros::ServiceServer invert_z_srv;
+            ros::ServiceServer invert_x_srv;
+
 
             // Driver objects
             CInterfaceLLT device_interface;

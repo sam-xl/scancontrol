@@ -117,6 +117,14 @@ Most servives are wrappers of the scanCONTROL API. For more information on the a
 
 	Retrieve a list of all available resolutions of the connected scanCONTROL device. 
 
+* **`~invert_x`** ([std_srvs/SetBool])
+
+	Flip the X values around the middle of the laser line of the sensor.  
+
+* **`~invert_z`** ([std_srvs/SetBool]
+
+	Flip the Z values around the middle of the measuring range of the sensor. Factory default value of of this setting is `True`.
+
 #### Parameters
 Device Settings
 * **`resolution`** (int)
@@ -157,3 +165,4 @@ Please report bugs and request features using the [Issue Tracker](https://github
 [micro_epsilon_scancontrol_msgs/GetResolution]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/GetResolution.srv
 [micro_epsilon_scancontrol_msgs/SetFeature]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/SetFeature.srv
 [micro_epsilon_scancontrol_msgs/SetResolution]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/SetResolution.srv
+[std_srvs/SetBool]: http://docs.ros.org/api/std_srvs/html/srv/SetBool.html

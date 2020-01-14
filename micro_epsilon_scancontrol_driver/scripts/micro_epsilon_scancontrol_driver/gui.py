@@ -8,7 +8,9 @@ from rospy.exceptions import ROSException, ROSInterruptException
 from python_qt_binding import loadUi
 from python_qt_binding.QtWidgets import QWidget, QLineEdit, QLineEdit, QPushButton, QMessageBox
 from qt_gui.plugin import Plugin
+
 from micro_epsilon_scancontrol_msgs.srv import GetAvailableResolutions, SetResolution, GetResolution, SetFeature, GetFeature
+from std_srvs.srv import SetBool
 
 class ScanControlGui(Plugin):
 
@@ -55,6 +57,12 @@ class ScanControlGui(Plugin):
             rospy.wait_for_service(ns + '/get_feature', timeout=5)
             self.get_feature = rospy.ServiceProxy(ns + '/get_feature', GetFeature)
 
+            rospy.wait_for_service(ns + '/invert_x', timeout=5)
+            self.invert_x = rospy.ServiceProxy(ns + '/invert_x', SetBool)
+
+            rospy.wait_for_service(ns + '/invert_z', timeout=5)
+            self.invert_z = rospy.ServiceProxy(ns + '/invert_z', SetBool)
+
         except (ROSException, ROSInterruptException):
             rospy.logfatal('Failed to find scanCONTROL services. Make sure the scancontrol node is up and running.')
             return
@@ -97,33 +105,16 @@ class ScanControlGui(Plugin):
         self.profile_frequency = self.calculate_frequency(self.exposure_time, self.idle_time)
 
         # Query profile processing
-        if (self.scanner_type >= 2000 and self.scanner_type <= 2999) or (self.scanner_type >= 3000 and self.scanner_type <= 3999):
-            # Scanner is either a scanCONTROL 26xx or scanCONTROL 29xx
-            response = self.get_feature(self.ID_PROCESSING)
-            if response.return_code < 0:
-                rospy.logwarn('Profile settings disabled. Failed to retrieve profile processing data.')
-                self._widget.checkBox_invertz.setEnabled(False)
-                self._widget.checkBox_invertx.setEnabled(False)
-                invert_z = False
-                invert_x = False
-            else:
-                self.profile_processing_value = response.value
-                invert_z = bool(int(bin(response.value)[-7])) # bit 6
-                invert_x = bool(int(bin(response.value)[-8])) # bit 7
-        elif (self.scanner_type >= 1000 and self.scanner_type <= 1999):
-            # Scanner is a scanCONTROL 27xx
-            rospy.logwarn('Profile settings disabled. Not available for scanCONTROL 27xx series.')
+        response = self.get_feature(self.ID_PROCESSING)
+        if response.return_code < 0:
+            rospy.logwarn('Profile settings disabled. Failed to retrieve profile processing data.')
             self._widget.checkBox_invertz.setEnabled(False)
             self._widget.checkBox_invertx.setEnabled(False)
             invert_z = False
             invert_x = False
-        else: 
-            # Scanner type not recognized
-            rospy.logwarn('Profile settings disabled. Scanner type not recognized.')
-            self._widget.checkBox_invertz.setEnabled(False)
-            self._widget.checkBox_invertx.setEnabled(False)
-            invert_z = False
-            invert_x = False
+        else:
+            invert_z = bool(int(bin(response.value)[-7])) # bit 6
+            invert_x = bool(int(bin(response.value)[-8])) # bit 7
 
         # Set GUI fields
         self._widget.comboBox_laserpower.setCurrentIndex(self.laser_power)
@@ -222,38 +213,23 @@ class ScanControlGui(Plugin):
 
     def select_invert_z(self):
         # Retrieve status of invert z checkbox
-        invert_z = self._widget.checkBox_invertz.isChecked()
+        invert_coordinate = self._widget.checkBox_invertz.isChecked()
 
-        # Set 6th bit according to the state of the checkbox
-        value = self.profile_processing_value & ~(1<<6)
-        if invert_z:
-            value |= (1<<6)
-        
-        # Set requested state
-        response = self.set_feature(self.ID_PROCESSING, value)
-        if response.return_code < 0:
-            rospy.logwarn("Failed to set 'Invert Z'. Error code: " + response.return_code)
-            self._widget.checkBox_invertz.setChecked(~invert_z)
-        else:
-            self.profile_processing_value = value
+        # Send service request
+        response = self.invert_z(invert_coordinate)
+        if not response.succes:
+            rospy.logwarn("Failed to set 'Invert Z'. Error code: " + response.message)
+            self._widget.checkBox_invertz.setChecked(~invert_coordinate)
 
     def select_invert_x(self):
         # Retrieve status of invert z checkbox
-        invert_x = self._widget.checkBox_invertz.isChecked()
+        invert_coordinate = self._widget.checkBox_invertz.isChecked()
 
-        # Set 7th bit according to the state of the checkbox
-        value = self.profile_processing_value & ~(1<<7)
-        if invert_x:
-            value |= (1<<7)
-
-        # Set requested state
-        response = self.set_feature(self.ID_PROCESSING, value)
-        if response.return_code < 0:
-            rospy.logwarn("Failed to set 'Invert X'. Error code: " + response.return_code)
-            self._widget.checkBox_invertx.setChecked(~invert_x)
-        else:
-            self.profile_processing_value = value
-
+        # Send service request
+        response = self.invert_x(invert_coordinate)
+        if not response.succes:
+            rospy.logwarn("Failed to set 'Invert X'. Error code: " + response.message)
+            self._widget.checkBox_invertz.setChecked(~invert_coordinate)
 
     def select_mode(self):
         # Retrieve selected mode

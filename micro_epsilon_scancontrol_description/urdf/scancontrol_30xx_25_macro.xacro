@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <!-- Macro for both 26x0 and 29x0 - 25 scan control sensor productlines -->
+  <!-- Macro for 30xx_25 scan control sensors  -->
   <xacro:macro name="microepsilon_scancontrol_30xx_25" params="prefix">
     <link name="${prefix}base_link">
       <visual>
-        <origin xyz="0.0205 -0.0345 0" rpy="${pi/2} 0 ${pi}"/>
+        <origin xyz="-0.0435 0.0 0.0" rpy="${pi/2} 0 ${pi}"/>
         <geometry>
           <mesh filename="package://micro_epsilon_scancontrol_description/meshes/visual/visual_30xx_25.dae"/>
        </geometry>
@@ -14,7 +14,7 @@
        </material>
       </visual>
       <collision>
-        <origin xyz="0.0205 0.0345 0" rpy="${pi/2} 0 ${pi}"/>
+        <origin xyz="-0.0435 0.0 0.0" rpy="${pi/2} 0 ${pi}"/>
         <geometry>
           <mesh filename="package://micro_epsilon_scancontrol_description/meshes/collision/collision_30xx_25.stl"/>
         </geometry>

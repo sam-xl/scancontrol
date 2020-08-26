@@ -140,7 +140,7 @@ namespace scancontrol_driver
         } else if (device_type >= scanCONTROL30xx_25 && device_type <= scanCONTROL30xx_xxx) {
             ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL30xx, with serial number " << config_.serial << ".");
             config_.model = std::string("scanCONTROL30xx");
-        } else if (device_type >= scanCONTROL25xx_25 && device_type <= scanCONTROL25xx_xx) {
+        } else if (device_type >= scanCONTROL25xx_25 && device_type <= scanCONTROL25xx_xxx) {
             ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL25xx, with serial number " << config_.serial << ".");
             config_.model = std::string("scanCONTROL25xx");
         } else {

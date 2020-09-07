@@ -7,7 +7,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(glib2 REQUIRED glib-2.0)
 pkg_check_modules(aravis REQUIRED aravis-0.6)
 
-set(llt_INCLUDE_DIRS /usr/local/include/libllt)
+set(llt_INCLUDE_DIRS /usr/local/include/mescan)
 set(llt_LIBRARIES /usr/local/lib/libllt.so)
 
 set(mescan_INCLUDE_DIRS /usr/local/include/libmescan)

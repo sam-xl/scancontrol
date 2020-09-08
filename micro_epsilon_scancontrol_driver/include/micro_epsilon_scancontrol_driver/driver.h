@@ -91,7 +91,7 @@ namespace scancontrol_driver
 
 
             // Driver objects
-            CInterfaceLLT device_interface;
+            CInterfaceLLT* device_interface;
             TScannerType device_type;
             TPartialProfile t_partial_profile_;
             std::vector<guint8> profile_buffer;

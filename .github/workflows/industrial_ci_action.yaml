@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         env:
-          - {OS_NAME: ubuntu, ROS_DISTRO: melodic, DOCKER_IMAGE: "samxl/scancontrol:latest"}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: bionic, ROS_DISTRO: melodic, DOCKER_IMAGE: "samxl/scancontrol:latest"}
     env:
       CCACHE_DIR: /github/home/.ccache
     runs-on: ubuntu-latest

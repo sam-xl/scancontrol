@@ -13,10 +13,6 @@
   <buildtool_depend>catkin</buildtool_depend>
   
   <depend>roscpp</depend>
-  <depend>rospy</depend>
-
-  <depend>rqt_gui</depend>
-  <depend>rqt_gui_py</depend>
   <depend>pcl_ros</depend>
   <depend>nodelet</depend>
 
@@ -24,6 +20,5 @@
 
   <export>
     <nodelet plugin="${prefix}/me_scancontrol_nodelet.xml"/>
-    <rqt_gui plugin="${prefix}/me_scancontrol_gui.xml"/>
   </export>
 </package>

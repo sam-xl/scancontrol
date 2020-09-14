@@ -25,7 +25,7 @@ namespace scancontrol_driver
         private_nh_.param("partial_profile_data_width", config_.pp_point_data_width, 4);
 
         // Create driver interface object:
-        device_interface_ptr = std::make_shared<CInterfaceLLT>();
+        device_interface_ptr = std::make_unique<CInterfaceLLT>();
 
         /*
             Search for available scanCONTROL interfaces

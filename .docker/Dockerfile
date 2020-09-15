@@ -1,8 +1,7 @@
 FROM ubuntu:bionic AS build
 
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends wget meson debhelper git gcc g++ intltool pkg-config glib2.0 libxml2-dev unzip checkinstall && \
-    apt-get upgrade -y && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends checkinstall debhelper g++ gcc git glib2.0 intltool libxml2-dev meson pkg-config unzip wget && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget http://ftp.acc.umu.se/pub/GNOME/sources/aravis/0.6/aravis-0.6.4.tar.xz && \
@@ -23,7 +22,7 @@ RUN wget https://software.micro-epsilon.com/scanCONTROL-Linux-SDK-0-2-4.zip && \
     ninja && \
     checkinstall --pkgname mescan --pkgversion 0.2.4 ninja install && \
     ldconfig && \
-    cd /scanCONTROL\ Linux\ SDK\ 0.2.4/libllt/ && \
+    cd "/scanCONTROL Linux SDK 0.2.4/libllt/" && \
     meson builddir && \
     cd builddir && \
     ninja && \
@@ -35,11 +34,9 @@ RUN mkdir /library_pkgs && \
     mv "/scanCONTROL Linux SDK 0.2.4/libllt/builddir/llt_0.2.4-1_amd64.deb" /library_pkgs
 
 FROM ros:melodic-ros-core
-ENV ROS_DISTRO melodic
 
 RUN apt-get update && \
-    apt-get install -y intltool pkg-config glib2.0 libxml2-dev && \
-    apt-get upgrade -y && \
+    apt-get install -y glib2.0 intltool libxml2-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build ["/library_pkgs", "/library_pkgs"]

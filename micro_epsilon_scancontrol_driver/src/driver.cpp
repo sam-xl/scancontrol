@@ -78,7 +78,7 @@ namespace scancontrol_driver
             if (config_.serial != ""){
                 for (int i = 0; i < interface_count; i++){
                     std::string interface(available_interfaces[i]);
-                    if (interface.find(config_.serial) > -1){
+                    if (interface.find(config_.serial) != std::string::npos){
                         ROS_INFO_STREAM("Interface found: " << interface);
                         selected_interface = i;
                         break;
@@ -236,32 +236,35 @@ namespace scancontrol_driver
     int ScanControlDriver::SetPartialProfile(int &resolution){
         gint32 return_code = 0;
         // Set profile configuration to partial profile
-        if ((return_code = device_interface_ptr->SetProfileConfig(PARTIAL_PROFILE)) < GENERAL_FUNCTION_OK){
-            ROS_WARN_STREAM("Error while setting profile config to PARTIAL_PROFILE. Code: " << return_code);
+        if ((return_code = device_interface_ptr->SetProfileConfig(PROFILE)) < GENERAL_FUNCTION_OK){
+            ROS_WARN_STREAM("Error while setting profile config to PROFILE. Code: " << return_code);
             return GENERAL_FUNCTION_FAILED;
         }
 
         // Create partial profile object and send to device
-        t_partial_profile_.nStartPoint = config_.pp_start_point;
-        t_partial_profile_.nStartPointData = config_.pp_start_point_data;
-        t_partial_profile_.nPointDataWidth = config_.pp_point_data_width;
-        t_partial_profile_.nPointCount = (config_.pp_point_count == -1 || config_.pp_point_count > resolution) ? resolution : config_.pp_point_count;
+        // t_partial_profile_.nStartPoint = config_.pp_start_point;
+        // t_partial_profile_.nStartPointData = config_.pp_start_point_data;
+        // t_partial_profile_.nPointDataWidth = config_.pp_point_data_width;
+        // t_partial_profile_.nPointCount = (config_.pp_point_count == -1 || config_.pp_point_count > resolution) ? resolution : config_.pp_point_count;
 
         // Send partial profile settings to device
-        if ((return_code = device_interface_ptr->SetPartialProfile(&t_partial_profile_)) < GENERAL_FUNCTION_OK){
-            // Restore nPointCount to old value 
-            t_partial_profile_.nPointCount = (config_.pp_point_count == -1 || config_.pp_point_count > resolution) ? config_.resolution : config_.pp_point_count;
+        // if ((return_code = device_interface_ptr->SetPartialProfile(&t_partial_profile_)) < GENERAL_FUNCTION_OK){
+        //     // Restore nPointCount to old value 
+        //     t_partial_profile_.nPointCount = (config_.pp_point_count == -1 || config_.pp_point_count > resolution) ? config_.resolution : config_.pp_point_count;
             
-            // Send warning and return failed
-            ROS_WARN_STREAM("Error while setting partial profile settings. Code: " << return_code);
-            return GENERAL_FUNCTION_FAILED;
-        }
+        //     // Send warning and return failed
+        //     ROS_WARN_STREAM("Error while setting partial profile settings. Code: " << return_code);
+        //     return GENERAL_FUNCTION_FAILED;
+        // }
 
         // Resize buffers - values contain less than the point count, due to the timestamp data
-        profile_buffer.resize(t_partial_profile_.nPointCount*t_partial_profile_.nPointDataWidth);
-        lost_values = (16 + t_partial_profile_.nPointDataWidth - 1)/t_partial_profile_.nPointDataWidth;
-        value_x.resize(t_partial_profile_.nPointCount);
-        value_z.resize(t_partial_profile_.nPointCount);
+        profile_buffer.resize(config_.resolution*64);
+        // profile_buffer.resize(t_partial_profile_.nPointCount*t_partial_profile_.nPointDataWidth);
+        lost_values = 0; // (16 + t_partial_profile_.nPointDataWidth - 1)/t_partial_profile_.nPointDataWidth;
+        value_x.resize(config_.resolution);
+        value_z.resize(config_.resolution);
+        // value_x.resize(t_partial_profile_.nPointCount);
+        // value_z.resize(t_partial_profile_.nPointCount);
         ROS_INFO_STREAM("Profile is losing " << std::to_string(lost_values) << " values due to timestamp of 16 byte at the end of the profile.");
 
         // Prepare new point cloud message
@@ -302,16 +305,16 @@ namespace scancontrol_driver
     /* Process raw profile data and create the point cloud message */
     int ScanControlDriver::Profile2PointCloud(){
 
-        device_interface_ptr->ConvertPartProfile2Values(&profile_buffer[0], profile_buffer.size(), &t_partial_profile_, device_type, 0, NULL, NULL, NULL, &value_x[0], &value_z[0], NULL, NULL);
+        device_interface_ptr->ConvertProfile2Values(&profile_buffer[0], profile_buffer.size(), config_.resolution, PROFILE, device_type, 0, NULL, NULL, NULL, &value_x[0], &value_z[0], NULL, NULL);
         for (int i = 0; i < config_.resolution; i++){
-            point_cloud_msg->points[i].x = value_x[i]/1000;
+            point_cloud_msg->points[i].x = value_x[i]/1000.0;
             
             // Fill in NaN if the scanner is to close or far away (sensor returns ~32.232) and for the final few points which are overwritten by the timestamp data
             if ((value_z[i] < 32.5) || (i >= config_.resolution - lost_values)){
                 point_cloud_msg->points[i].z = std::numeric_limits<double>::infinity(); 
             }
             else{
-                point_cloud_msg->points[i].z = value_z[i]/1000;
+                point_cloud_msg->points[i].z = value_z[i]/1000.0;
             }
         }
         return GENERAL_FUNCTION_OK;

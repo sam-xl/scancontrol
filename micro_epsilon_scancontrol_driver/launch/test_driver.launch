@@ -3,9 +3,6 @@
     <!-- Load the Micro Epsilon scanCONTROL driver -->
     <node name="scancontrol_driver" pkg="micro_epsilon_scancontrol_driver" type="driver_node" output="screen" required="true" />
 
-    <!-- Start the setting GUI of the Micro Epsilon scanCONTROL driver -->
-    <node name = "rqt_scancontrol_gui" pkg = "rqt_gui" type = "rqt_gui" respawn = "false" output = "screen" args = "--perspective-file $(find micro_epsilon_scancontrol_driver)/config/rqt.perspective"/>
-
     <!-- Load the Micro Epsilon scanCONTROL description (URDF) -->
     <include file="$(find micro_epsilon_scancontrol_description)/launch/load_scancontrol_26x0_29x0_25.launch" />
 

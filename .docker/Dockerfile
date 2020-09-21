@@ -61,7 +61,3 @@ RUN apt-get update && \
     apt install -y /library_pkgs/aravis_0.6.4-1_amd64.deb && \
     apt install /library_pkgs/mescan_0.2.4-1_amd64.deb && \
     apt install /library_pkgs/llt_0.2.4-1_amd64.deb
-
-COPY ./docker_entrypoint.sh /
-ENTRYPOINT [ "/docker_entrypoint.sh" ]
-CMD [ "bash" ]

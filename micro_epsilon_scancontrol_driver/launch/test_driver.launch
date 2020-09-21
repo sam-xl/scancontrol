@@ -1,18 +1,19 @@
 <launch>
+    <arg name="sensor_model" default="30x0" />
 
     <!-- Load the Micro Epsilon scanCONTROL driver -->
-    <node name="scancontrol_driver" pkg="micro_epsilon_scancontrol_driver" type="driver_node" output="screen" required="true" />
+    <include ns="scancontrol" file="$(find micro_epsilon_scancontrol_driver)/launch/load_driver.launch"/>
 
     <!-- Load the Micro Epsilon scanCONTROL description (URDF) -->
-    <include file="$(find micro_epsilon_scancontrol_support)/launch/load_scancontrol_26x0_29x0_25.launch" />
+    <include file="$(find micro_epsilon_scancontrol_support)/launch/load_26x0_29x0_25.launch" if="$(eval arg('sensor_model') == '26x0' or arg('sensor_model') == '29x0')"/>
+    <include file="$(find micro_epsilon_scancontrol_support)/launch/load_27x0_100.launch" if="$(eval arg('sensor_model') == '27x0')" />
+    <include file="$(find micro_epsilon_scancontrol_support)/launch/load_30x0_25.launch" if="$(eval arg('sensor_model') == '30x0')" />
 
     <!-- Start the Joint State publisher and Robot State publisher (for correct visualization) -->
-    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
-        <param name="use_gui" value="false" />
-    </node>
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
     <!-- Start Rviz to visualize the data -->
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find micro_epsilon_scancontrol_support)/config/rviz.rviz" required="true" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find micro_epsilon_scancontrol_support)/config/test_driver_config.rviz" required="true" />
 
 </launch>

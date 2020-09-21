@@ -21,14 +21,14 @@
       </collision>
     </link>
 
-    <link name="${prefix}aperture_frame" />
+    <link name="${prefix}optical_frame" />
 
-    <joint name="${prefix}base_link-${prefix}aperture_frame" type="fixed">
+    <joint name="${prefix}base_link-optical_frame" type="fixed">
      <!-- xyz values represent the distance between the top mounting hole and the lens of the laser  -->
      <!-- rpy values are chosen so the x and z axes are consistent with the internal sensor measurement frame -->
       <origin xyz="-0.0935 0 -0.0767" rpy="${pi} 0 ${pi/2}" />
       <parent link="${prefix}base_link" />
-      <child link="${prefix}aperture_frame" />
+      <child link="${prefix}optical_frame" />
     </joint>
 
   </xacro:macro>

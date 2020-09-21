@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>micro_epsilon_scancontrol_description</name>
+  <name>micro_epsilon_scancontrol_support</name>
   <version>0.1.0</version>
   <description>URDFs for the Micro-Epsilon scanCONTROL laser profile sensors.</description>
   <maintainer email="riktonnaer@hotmail.com">Rik Tonnaer (Delft University of Technology)</maintainer>

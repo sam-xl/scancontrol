@@ -1,5 +1,5 @@
 # micro_epsilon_scancontrol
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![CI](https://github.com/sam-xl/scancontrol/workflows/CI/badge.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Overview
 
@@ -15,8 +15,8 @@ The micro_epsilon_scancontrol package has been tested under [ROS] Melodic and Ub
 
 #### Dependencies
 
-- [Aravis 0.6](https://github.com/AravisProject/aravis)
-- [scanCONTROL Linux C++ SDK 0.2](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
+- [Aravis 0.6.x](https://github.com/AravisProject/aravis)
+- [scanCONTROL Linux C++ SDK 0.2.4](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
 
 <!-- Note: Optional scripts to (un)install the dependencies can be found [here](). [Password required] -->
 

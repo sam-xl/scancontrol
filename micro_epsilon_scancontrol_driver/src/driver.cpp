@@ -64,7 +64,7 @@ namespace scancontrol_driver
 
             // Check if the available device is the same as the prefered device (if a serial is provided):
             std::string interface(available_interfaces[0]);
-            if ((config_.serial == "") || (interface.find(config_.serial) > -1)){
+            if ((config_.serial == "") || (interface.find(config_.serial) != std::string::npos)){
                 ROS_INFO_STREAM("Interface found: " << interface);
             }
             else{
@@ -78,7 +78,7 @@ namespace scancontrol_driver
             if (config_.serial != ""){
                 for (int i = 0; i < interface_count; i++){
                     std::string interface(available_interfaces[i]);
-                    if (interface.find(config_.serial) > -1){
+                    if (interface.find(config_.serial) != std::string::npos){
                         ROS_INFO_STREAM("Interface found: " << interface);
                         selected_interface = i;
                         break;
@@ -163,7 +163,7 @@ namespace scancontrol_driver
             gint8 selected_resolution = -1;
             for (int i = 0; i < return_code; i++){
                 std::string resolution = std::to_string(available_resolutions[i]);
-                if (resolution.find(config_.serial) > -1){
+                if (resolution.find(config_.resolution) != std::string::npos){
                     selected_resolution = i;
                     break;
                 }

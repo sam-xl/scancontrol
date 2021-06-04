@@ -1,12 +1,14 @@
 #ifndef _SCANCONTROL_DRIVER_H_
 #define _SCANCONTROL_DRIVER_H_
 
+// C++
+#include <memory>
+
+// ROS
 #include <rclcpp/rclcpp.hpp>
 #include <pcl/point_types.h>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <pcl_conversions/pcl_conversions.h>
-
-#include <memory>
 
 #include <std_srvs/srv/set_bool.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_feature.hpp>
@@ -33,7 +35,7 @@ namespace scancontrol_driver
     {
         public:
             // Constructor and destructor
-            ScanControlDriver(rclcpp::Node::SharedPtr nh, rclcpp::Node::SharedPtr private_nh);
+            ScanControlDriver(rclcpp::Node::SharedPtr& nh, rclcpp::Node::SharedPtr& private_nh);
             ~ScanControlDriver() {}
             
             // Profile functions

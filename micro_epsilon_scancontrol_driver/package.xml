@@ -21,7 +21,10 @@
 
   <depend>micro_epsilon_scancontrol_msgs</depend>
 
-  <export>
+  <!-- <export>
     <nodelet plugin="${prefix}/me_scancontrol_nodelet.xml"/>
+  </export> -->
+  <export>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

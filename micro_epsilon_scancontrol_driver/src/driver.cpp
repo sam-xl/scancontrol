@@ -5,7 +5,6 @@ namespace scancontrol_driver
 
     static const rclcpp::Logger LOGGER = rclcpp::get_logger("micro_epsilon_scancontrol_driver");
 
-    // ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private_nh)
     ScanControlDriver::ScanControlDriver(rclcpp::Node::SharedPtr nh, rclcpp::Node::SharedPtr private_nh)
     {   
         /* 
@@ -231,20 +230,20 @@ namespace scancontrol_driver
         using std::placeholders::_2;
 
         // Advertise services
-        get_feature_srv                 = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>(
-            "get_feature",  std::bind(&ScanControlDriver::ServiceGetFeature, this, _1, _2));
-        set_feature_srv                 = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>(
-            "set_feature",  std::bind(&ScanControlDriver::ServiceSetFeature, this, _1, _2));
-        get_resolution_srv              = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>(
-            "get_resolution",  std::bind(&ScanControlDriver::ServiceGetResolution, this, _1, _2));
-        set_resolution_srv              = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>(
-            "set_resolution",  std::bind(&ScanControlDriver::ServiceSetResolution, this, _1, _2)); 
+        get_feature_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>(
+            "get_feature", std::bind(&ScanControlDriver::ServiceGetFeature, this, _1, _2));
+        set_feature_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>(
+            "set_feature", std::bind(&ScanControlDriver::ServiceSetFeature, this, _1, _2));
+        get_resolution_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>(
+            "get_resolution", std::bind(&ScanControlDriver::ServiceGetResolution, this, _1, _2));
+        set_resolution_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>(
+            "set_resolution", std::bind(&ScanControlDriver::ServiceSetResolution, this, _1, _2)); 
         get_available_resolutions_srv   = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>(
             "get_available_resolutions",  std::bind(&ScanControlDriver::ServiceGetAvailableResolutions, this, _1, _2));
-        invert_z_srv                    = private_nh_->create_service<std_srvs::srv::SetBool>(
-            "invert_z",  std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
-        invert_x_srv                    = private_nh_->create_service<std_srvs::srv::SetBool>(
-            "invert_x",  std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
+        invert_z_srv = private_nh_->create_service<std_srvs::srv::SetBool>(
+            "invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
+        invert_x_srv = private_nh_->create_service<std_srvs::srv::SetBool>(
+            "invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){

@@ -5,12 +5,9 @@ static const rclcpp::Logger logger = rclcpp::get_logger("micro_epsilon_scancontr
 
 int main(int argc, char** argv)
 {
-    // ros::init(argc, argv, "");
-    // ros::NodeHandle node;
-    // ros::NodeHandle private_nh("~");
     rclcpp::init(argc, argv);
     rclcpp::Node::SharedPtr node;
-    auto private_node = rclcpp::Node::make_shared("~"); 
+    auto private_node = rclcpp::Node::make_shared("micro_epsilon_scancontrol_driver"); 
 
     // Start the driver
     try

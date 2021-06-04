@@ -31,9 +31,9 @@ def generate_launch_description():
             name='robot_state_publisher'
         ),
         launch_ros.actions.Node(
-            package='rviz',
-            executable='rviz',
-            name='rviz',
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
             on_exit=launch.actions.Shutdown()
         ),
         launch.actions.IncludeLaunchDescription(

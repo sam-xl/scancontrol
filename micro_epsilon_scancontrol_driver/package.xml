@@ -14,8 +14,10 @@
   
   <depend>rclcpp</depend>
   <depend>std_srvs</depend>
+  <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
-  <depend>nodelet</depend>
+  <depend>sensor_msgs</depend>
+  <!-- <depend>nodelet</depend> -->
 
   <depend>micro_epsilon_scancontrol_msgs</depend>
 

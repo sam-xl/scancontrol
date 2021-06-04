@@ -3,7 +3,8 @@
 
 #include <rclcpp/rclcpp.hpp>
 #include <pcl/point_types.h>
-// #include <pcl_ros/point_cloud.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
+#include <pcl_conversions/pcl_conversions.h>
 
 #include <memory>
 
@@ -32,7 +33,7 @@ namespace scancontrol_driver
     {
         public:
             // Constructor and destructor
-            ScanControlDriver(rclcpp::Node nh, rclcpp::Node private_nh);
+            ScanControlDriver(rclcpp::Node::SharedPtr nh, rclcpp::Node::SharedPtr private_nh);
             ~ScanControlDriver() {}
             
             // Profile functions
@@ -50,27 +51,27 @@ namespace scancontrol_driver
             int resolution() const {return config_.resolution;};
 
             // Service Callback
-            bool ServiceSetFeature(
+            void ServiceSetFeature(
                 const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Request> request, 
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Response> response);
-            bool ServiceGetFeature(
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Response> response);
+            void ServiceGetFeature(
                 const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Request> request,
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Response> response);
-            bool ServiceSetResolution(
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Response> response);
+            void ServiceSetResolution(
                 const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Request> request,
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Response> response);
-            bool ServiceGetResolution(
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Response> response);
+            void ServiceGetResolution(
                 const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Request> request,
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Response> response);
-            bool ServiceGetAvailableResolutions(
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Response> response);
+            void ServiceGetAvailableResolutions(
                 const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Request> request,
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Response> response);
-            bool ServiceInvertZ(
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Response> response);
+            void ServiceInvertZ(
                 const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
-            bool ServiceInvertX(
+                std::shared_ptr<std_srvs::srv::SetBool::Response> response);
+            void ServiceInvertX(
                 const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-                const std::shared_ptr<std_srvs::srv::SetBool::Response> response);
+                std::shared_ptr<std_srvs::srv::SetBool::Response> response);
     
         private:
             // Profile functions
@@ -96,14 +97,14 @@ namespace scancontrol_driver
             // ROS handles
             rclcpp::Node::SharedPtr nh_;
             rclcpp::Node::SharedPtr private_nh_;
-            rclcpp::Publisher<point_cloud_t> publisher;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetFeature> get_feature_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetFeature> set_feature_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetResolution> get_resolution_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetResolution> set_resolution_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions> get_available_resolutions_srv;
-            rclcpp::Service<std_srvs::srv::SetBool> invert_z_srv;
-            rclcpp::Service<std_srvs::srv::SetBool> invert_x_srv;
+            rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetFeature>::SharedPtr get_feature_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetFeature>::SharedPtr set_feature_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetResolution>::SharedPtr get_resolution_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetResolution>::SharedPtr set_resolution_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>::SharedPtr get_available_resolutions_srv;
+            rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
+            rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
 
 
 

@@ -6,7 +6,7 @@ namespace scancontrol_driver
     static const rclcpp::Logger LOGGER = rclcpp::get_logger("micro_epsilon_scancontrol_driver");
 
     // ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private_nh)
-    ScanControlDriver::ScanControlDriver(rclcpp::Node nh, rclcpp::Node private_nh)
+    ScanControlDriver::ScanControlDriver(rclcpp::Node::SharedPtr nh, rclcpp::Node::SharedPtr private_nh)
     {   
         /* 
             Store the ros::NodeHandle objects and extract the relevant parameters. 
@@ -225,16 +225,26 @@ namespace scancontrol_driver
             }
 
         // Advertise topic
-        publisher           = nh.advertise<point_cloud_t>(config_.topic_name, 10);
-        
+        publisher           = nh_->create_publisher<sensor_msgs::msg::PointCloud2>(config_.topic_name, 10);
+
+        using std::placeholders::_1;
+        using std::placeholders::_2;
+
         // Advertise services
-        get_feature_srv                 = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>("get_feature", &ScanControlDriver::ServiceGetFeature, this);
-        set_feature_srv                 = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>("set_feature", &ScanControlDriver::ServiceSetFeature, this);
-        get_resolution_srv              = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>("get_resolution", &ScanControlDriver::ServiceGetResolution, this);
-        set_resolution_srv              = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>("set_resolution", &ScanControlDriver::ServiceSetResolution, this); 
-        get_available_resolutions_srv   = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>("get_available_resolutions", &ScanControlDriver::ServiceGetAvailableResolutions, this);
-        invert_z_srv                    = private_nh_->create_service<std_srvs::srv::SetBool>("invert_z", &ScanControlDriver::ServiceInvertZ, this);
-        invert_x_srv                    = private_nh_->create_service<std_srvs::srv::SetBool>("invert_x", &ScanControlDriver::ServiceInvertX, this);
+        get_feature_srv                 = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>(
+            "get_feature",  std::bind(&ScanControlDriver::ServiceGetFeature, this, _1, _2));
+        set_feature_srv                 = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>(
+            "set_feature",  std::bind(&ScanControlDriver::ServiceSetFeature, this, _1, _2));
+        get_resolution_srv              = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>(
+            "get_resolution",  std::bind(&ScanControlDriver::ServiceGetResolution, this, _1, _2));
+        set_resolution_srv              = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>(
+            "set_resolution",  std::bind(&ScanControlDriver::ServiceSetResolution, this, _1, _2)); 
+        get_available_resolutions_srv   = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>(
+            "get_available_resolutions",  std::bind(&ScanControlDriver::ServiceGetAvailableResolutions, this, _1, _2));
+        invert_z_srv                    = private_nh_->create_service<std_srvs::srv::SetBool>(
+            "invert_z",  std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
+        invert_x_srv                    = private_nh_->create_service<std_srvs::srv::SetBool>(
+            "invert_x",  std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){
@@ -324,7 +334,7 @@ namespace scancontrol_driver
     /* Process and publish profile */
     int ScanControlDriver::ProcessAndPublishProfile(const void * data, size_t data_size){
         // Timestamp 
-        pcl_conversions::toPCL(rclcpp::Time::now(), point_cloud_msg->header.stamp);
+        pcl_conversions::toPCL(nh_->get_clock()->now(), point_cloud_msg->header.stamp);
 
         // Copy sensor data to local buffer 
         if (data != NULL && data_size == profile_buffer.size()){
@@ -333,7 +343,11 @@ namespace scancontrol_driver
 
         // Process buffer and publish point cloud
         ScanControlDriver::Profile2PointCloud();
-        publisher->publish(point_cloud_msg);
+        // TODO: Is their a better way as long as pcl_ros is not ported to ROS2
+        sensor_msgs::msg::PointCloud2 output_msg;
+        pcl::toROSMsg<pcl::PointXYZI>(*point_cloud_msg, output_msg);        
+        
+        publisher->publish(output_msg);
 
         return GENERAL_FUNCTION_OK;
     }
@@ -378,62 +392,62 @@ namespace scancontrol_driver
     }
 
     /* Wrapper of the SetFeature call for use by the ServiceSetFeature service */
-    bool ScanControlDriver::ServiceSetFeature(
+    void ScanControlDriver::ServiceSetFeature(
             const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Request> request,
-            const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Response> response)
+            std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Response> response)
     {
         response->return_code = ScanControlDriver::SetFeature(request->setting, request->value);
-        return true;
+        // return true;
     }
 
     /* Wrapper of the GetFeature call for use by the ServiceGetFeature service */
-    bool ScanControlDriver::ServiceGetFeature(
+    void ScanControlDriver::ServiceGetFeature(
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Request> request,
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Response> response)
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Response> response)
     {
         response->return_code = ScanControlDriver::GetFeature(request->setting, &(response->value));
-        return true;
+        // return true;
     }
 
     /* Wrapper of the SetResolution call for use by the ServiceSetResolution service */
-    bool ScanControlDriver::ServiceSetResolution(
+    void ScanControlDriver::ServiceSetResolution(
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Request> request,
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Response> response)
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Response> response)
     {
         if (response->return_code = StopProfileTransfer() < GENERAL_FUNCTION_OK){
-            return true;
+            // return true;
         }
         if (response->return_code = device_interface_ptr->SetResolution(request->resolution) < GENERAL_FUNCTION_OK){
             RCLCPP_WARN_STREAM(LOGGER, "Error while setting device resolution! Code: " << response->return_code);
-            return true;
+            // return true;
         }
         int temp_resolution = request->resolution;
         if (response->return_code = SetPartialProfile(temp_resolution) < GENERAL_FUNCTION_OK){
             RCLCPP_WARN_STREAM(LOGGER, "Error while setting partial profile. Code: " << response->return_code);
-            return true;
+            // return true;
         }
         if (response->return_code = StartProfileTransfer() < GENERAL_FUNCTION_OK){
-            return true;
+            // return true;
         }
 
         // Change of resolution was succesull
         config_.resolution = request->resolution;
-        return true;
+        // return true;
     }
 
     /* Wrapper of the GetResolution call for use by the ServiceGetResolution service */
-    bool ScanControlDriver::ServiceGetResolution(
+    void ScanControlDriver::ServiceGetResolution(
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Request> request,
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Response> response)
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Response> response)
     {
         response->return_code = device_interface_ptr->GetResolution(&(response->resolution));
-        return true;
+        // return true;
     }
     
     /* Wrapper of the GetResolutions call for use by the ServiceGetAvailableResolutions service */
-    bool ScanControlDriver::ServiceGetAvailableResolutions(
+    void ScanControlDriver::ServiceGetAvailableResolutions(
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Request> request,
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Response> response
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Response> response
     ){
         guint32 available_resolutions[MAX_RESOLUTION_COUNT] = {0};
         response->return_code = device_interface_ptr->GetResolutions(&available_resolutions[0], MAX_RESOLUTION_COUNT);
@@ -442,7 +456,7 @@ namespace scancontrol_driver
                 response->resolutions.push_back(available_resolutions[i]);
             }  
         }
-        return true;
+        // return true;
     }
 
     /* 
@@ -450,9 +464,9 @@ namespace scancontrol_driver
         If request->data == true > Enable the inversion of Z values on the scanCONTROL device. (Default of the scanCONTROL device)
         If request->data == false > Disable the inversion of Z values on the scanCONTROL device.
     */
-    bool ScanControlDriver::ServiceInvertZ(
+    void ScanControlDriver::ServiceInvertZ(
         const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-        const std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+        std::shared_ptr<std_srvs::srv::SetBool::Response> response)
     {   
         unsigned int value;
         int return_code; 
@@ -463,7 +477,7 @@ namespace scancontrol_driver
             // Failed to get PROCESSING feature
             response->success = false;
             response->message = std::string("Failed to get 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-            return true;
+            // return true;
         }
 
         // Set 6th bit according to the SetBool service request
@@ -479,12 +493,12 @@ namespace scancontrol_driver
             // Failed to set PROCESSING feature
             response->success = false;
             response->message = std::string("Failed to set 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-            return true;
+            // return true;
         }
 
         response->success = true;
 
-        return true;
+        // return true;
     }  
 
     /* 
@@ -492,9 +506,9 @@ namespace scancontrol_driver
         If request->data == true > Enable the inversion of X values on the scanCONTROL device. (Default of the scanCONTROL device)
         If request->data == false > Disable the inversion of X values on the scanCONTROL device.
     */
-    bool ScanControlDriver::ServiceInvertX(
+    void ScanControlDriver::ServiceInvertX(
         const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-        const std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+        std::shared_ptr<std_srvs::srv::SetBool::Response> response)
     {   
         unsigned int value;
         int return_code; 
@@ -505,7 +519,7 @@ namespace scancontrol_driver
             // Failed to get PROCESSING feature
             response->success = false;
             response->message = std::string("Failed to get 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-            return true;
+            // return true;
         }
 
         // Set 6th bit according to the SetBool service request
@@ -521,12 +535,12 @@ namespace scancontrol_driver
             // Failed to set PROCESSING feature
             response->success = false;
             response->message = std::string("Failed to set 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-            return true;
+            // return true;
         }
 
         response->success = true;
 
-        return true;
+        // return true;
     }  
 
     /* Callback for when a new profile is read, for use with the scanCONTROL API. */

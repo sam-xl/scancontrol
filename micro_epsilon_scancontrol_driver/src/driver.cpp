@@ -14,17 +14,25 @@ namespace scancontrol_driver
         private_nh_ = private_nh;
 
         // Device settings
+        private_nh_->declare_parameter<int>("resolution", -1);
         private_nh_->get_parameter_or("resolution", config_.resolution, -1);
 
-        // Multiple device parameters
+        // Multiple device parameters        
+        private_nh_->declare_parameter<std::string>("serial", std::string(""));
         private_nh_->get_parameter_or("serial", config_.serial, std::string(""));
+        private_nh_->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
         private_nh_->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
+        private_nh_->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));
         private_nh_->get_parameter_or("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
 
         // TODO: Are these parameters needed?
+        private_nh_->declare_parameter<int>("partial_profile_start_point", 0);
         private_nh_->get_parameter_or("partial_profile_start_point", config_.pp_start_point, 0);
+        private_nh_->declare_parameter<int>("partial_profile_start_point_data", 4);
         private_nh_->get_parameter_or("partial_profile_start_point_data", config_.pp_start_point_data, 4);
+        private_nh_->declare_parameter<int>("partial_profile_point_count", -1);
         private_nh_->get_parameter_or("partial_profile_point_count", config_.pp_point_count, -1);
+        private_nh_->declare_parameter<int>("partial_profile_data_width", 4);
         private_nh_->get_parameter_or("partial_profile_data_width", config_.pp_point_data_width, 4);
 
         // Create driver interface object:

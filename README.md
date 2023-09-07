@@ -1,45 +1,23 @@
 # micro_epsilon_scancontrol
-![CI](https://github.com/sam-xl/scancontrol/workflows/CI/badge.svg) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![CI](https://github.com/sam-xl/scancontrol/workflows/CI/badge.svg) 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Overview
 
-ROS device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 0.2]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
+ROS device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 1.0]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
 
-**Author: D. Kroezen (GitHub username: dave992)<br />
-Affiliation: [SAM|XL](https://samxl.com/), [TU Delft](https://tudelft.nl/)<br />
+**Author: D. Kroezen, E. Bernardi<br />
+Affiliation: [SAM XL](https://samxl.com/), [TU Delft](https://tudelft.nl/)<br />
 Maintainer: D. Kroezen, d.kroezen@tudelft.nl**
 
-The micro_epsilon_scancontrol package has been tested under [ROS] Melodic and Ubuntu 18.04. 
+The micro_epsilon_scancontrol package has been tested under [ROS2 Humble](https://docs.ros.org/en/humble/index.html) and Ubuntu 22.04.3 Jammy LTS.
 
 ## Installation
 
 #### Dependencies
 
-- [Aravis 0.6.x](https://github.com/AravisProject/aravis)
-- [scanCONTROL Linux C++ SDK 0.2.4](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
-
-<!-- Note: Optional scripts to (un)install the dependencies can be found [here](). [Password required] -->
-
-<!-- # Micro Epsilon scanCONTROL ROS Driver
-
-## Installation instructions 
-### NOTE: Installation files are not included in this repository! 
-Install dependencies:
-`sudo apt install checkinstall` 
-
-Move to api folder:
-`cd micro_espilon_scancontrol_api/`
-
-Run the install script and follow the instructions in the command window:
-`sudo bash install.sh`
-
-## Uninstal instructions
-### NOTE: Uninstallation files are not included in this repository! 
-Move to the api folder:
-`cd micro_espilon_scancontrol_api/`
-
-Run the uninstall script and follow the instruction in the command window:
-`sudo bash uninstall.sh` -->
+- [Aravis 0.8.x](https://github.com/AravisProject/aravis/releases) [[docs]](https://aravisproject.github.io/aravis/)
+- [scanCONTROL Linux C++ SDK 1.0.x](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
 
 #### Building
 

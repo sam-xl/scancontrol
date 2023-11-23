@@ -69,8 +69,6 @@ ARG SCANCONTROL_SDK_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
       intltool \
-      libglib2.0-dev \
-      libusb-1.0-0-dev \
       pkg-config \
     && rm -rf /var/lib/apt/lists/*
 

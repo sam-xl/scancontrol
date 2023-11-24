@@ -22,13 +22,18 @@ jobs:
   
   clang_format_check:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        env:
+          - {OS_NAME: ubuntu, OS_CODE_NAME: focal, ROS_DISTRO: noetic, DOCKER_IMAGE: "samxl/scancontrol:sdk_v1.0.0"}
+  
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
     - name: Run industrial_ci with Clang Format check
       uses: ros-industrial/industrial_ci@master
+      env: ${{ matrix.env }}
       with:
         BUILD_TOOL: catkin
         CATKIN_LINT: 'false'

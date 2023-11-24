@@ -20,11 +20,27 @@ jobs:
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
   
-  clang-format-checking:
+  clang_format_check:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: RafikFarhad/clang-format-github-action@v3
-        with:
-          sources: "include/**/*.h,src/*.cpp"
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up ROS
+      uses: ros/tooling@main
+      with:
+        rosdistro: 'noetic'
+        source-rosdistro: 'noetic'
+
+    - name: Run industrial_ci with Clang Format check
+      uses: ros-industrial/industrial_ci@master
+      with:
+        BUILD_TOOL: catkin
+        CATKIN_LINT: 'false'
+        CLANG_FORMAT_CHECK: "file"
+        CLANG_FORMAT_VERSION: "10"
+
+        # You might need to adjust the path if your package is not at the root of the repository
+        CATKIN_PKGS: "$(basename $GITHUB_REPOSITORY)"
   

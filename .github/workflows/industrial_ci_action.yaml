@@ -32,6 +32,7 @@ jobs:
       with:
         rosdistro: 'noetic'
         source-rosdistro: 'noetic'
+        import-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run industrial_ci with Clang Format check
       uses: ros-industrial/industrial_ci@master

@@ -20,17 +20,22 @@ jobs:
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
   
-  clang_format_check:
+  clang-format-check:
     runs-on: ubuntu-latest
+
+    needs: build
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
 
-    - name: Run Clang Format Check
+    
+    - name: Install clang-format
+      run: sudo apt-get install -y clang-format
+
+    - name: Check Clang Format
       run: |
-        find . -name "*.cpp" -o -name "*.hpp" | xargs clang-format-10 --output-replacements-xml | grep -c "<replacement "
-        if [ $? -eq 0 ]; then
-          echo "Clang Format check failed. Please run clang-format locally and commit the changes."
-          exit 1
-        fi
+        find . -name '*.cpp' -o -name '*.hpp' | xargs clang-format --output-replacements-xml | grep -c '<replacement ' > /tmp/clang-format-output
+        cat /tmp/clang-format-output
+        test $(cat /tmp/clang-format-output) -eq 0
+

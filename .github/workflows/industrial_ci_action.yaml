@@ -21,19 +21,15 @@ jobs:
         env: ${{ matrix.env }}
   
   clang-format-check:
+    strategy:
+      matrix:
+        env:
+          - {OS_NAME: ubuntu, OS_CODE_NAME: focal, ROS_DISTRO: noetic, DOCKER_IMAGE: "samxl/scancontrol:sdk_v1.0.0"}
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    
-    - name: Install clang-format
-      run: sudo apt-get install -y clang-format
-
-    - name: Check Clang Format
-      run: |
-        find . -name '*.cpp' -o -name '*.hpp' | xargs clang-format --output-replacements-xml | grep -c '<replacement ' > /tmp/clang-format-output
-        cat /tmp/clang-format-output
-        test $(cat /tmp/clang-format-output) -eq 0
-
+      - uses: actions/checkout@v2
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{ matrix.env }}
+        with:
+          CLANG_FORMAT_CHECK: file
+          CLANG_FORMAT_VERSION: 10 

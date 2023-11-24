@@ -41,7 +41,7 @@ RUN wget https://github.com/AravisProject/aravis/releases/download/0.8.30/aravis
     meson setup build && \
     cd build && \
     ninja && \
-    checkinstall --pkgname aravis --pkgversion 0.8.30 --requires="libglib2.0-dev, libxml2-dev" ninja install
+    checkinstall --pkgname aravis --pkgversion 0.8.30 --requires="libglib2.0-dev, libxml2-dev, libusb-1.0-0-dev" ninja install
 
 SHELL ["/bin/bash", "-c"]
 RUN wget https://software.micro-epsilon.com/scanCONTROL-Linux-SDK-${SCANCONTROL_SDK_VERSION//./-}.zip -O scanCONTROL-Linux-SDK-${SCANCONTROL_SDK_VERSION//./-}.zip && \

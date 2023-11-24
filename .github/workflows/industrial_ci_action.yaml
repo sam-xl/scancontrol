@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         env:
-          - {OS_NAME: ubuntu, OS_CODE_NAME: focal, ROS_DISTRO: noetic, DOCKER_IMAGE: "nithishkumarnks/scancontrol:1.0.0"}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: focal, ROS_DISTRO: noetic, DOCKER_IMAGE: "samxl/scancontrol:sdk_v1.0.0"}
     env:
       CCACHE_DIR: /github/home/.ccache
     runs-on: ubuntu-latest
@@ -27,3 +27,4 @@ jobs:
       - uses: RafikFarhad/clang-format-github-action@v3
         with:
           sources: "include/**/*.h,src/*.cpp"
+  

@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find micro_epsilon_scancontrol_support)/launch/load_27x0_100.launch" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find micro_epsilon_scancontrol_support)/config/rviz.rviz" required="true" />
+</launch>

@@ -88,40 +88,40 @@ The scancontrol_driver_node connects to the scanCONTROL device and allows contro
 
 #### Published Topics
 
-* **`/scancontrol_pointcloud`** ([sensor_msgs/PointCloud2])
+* **`profiles`** ([sensor_msgs/PointCloud2])
 
-	The laser scan data filtered by the partial profile settings. The last point(s) may get lost, as a timestamp overwrites the last 4 bytes of the measurement buffer.
+	The laser scan data filtered by the partial profile settings. The last point(s) may get lost, as a timestamp overwrites the last 4 bytes of the measurement buffer. Use the `frame_id` parameter to change the name of the reference frame in which the data is published.
 
 
 #### Services
 Most servives are wrappers of the scanCONTROL API. For more information on the available settings and values see the documentation as part of the [scanCONTROL Linux C++ SDK 0.2](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/). The rqt plugin uses these services to change the settings during runtime. 
 
-* **`~set_feature`** ([micro_epsilon_scancontrol_msgs/SetFeature])
+* **`set_feature`** ([micro_epsilon_scancontrol_msgs/SetFeature])
 
 	Set a feature (setting) on the scanCONTROL device. 
 
 
-* **`~get_feature`** ([micro_epsilon_scancontrol_msgs/GetFeature])
+* **`get_feature`** ([micro_epsilon_scancontrol_msgs/GetFeature])
 
 	Get the current feature (setting) from the connected scanCONTROL device. 
 
-* **`~get_resolution`** ([micro_epsilon_scancontrol_msgs/GetResolution])
+* **`get_resolution`** ([micro_epsilon_scancontrol_msgs/GetResolution])
 
 	Get the current active resolution used by the connected scanCONTROL device.
 
-* **`~set_resolution`** ([micro_epsilon_scancontrol_msgs/SetResolution])
+* **`set_resolution`** ([micro_epsilon_scancontrol_msgs/SetResolution])
 
 	Set the resultion of the connected scanCONTROL device.
 
-* **`~get_available_resolutions`** ([micro_epsilon_scancontrol_msgs/GetAvailableResolutions])
+* **`get_available_resolutions`** ([micro_epsilon_scancontrol_msgs/GetAvailableResolutions])
 
 	Retrieve a list of all available resolutions of the connected scanCONTROL device. 
 
-* **`~invert_x`** ([std_srvs/SetBool])
+* **`invert_x`** ([std_srvs/SetBool])
 
 	Flip the X values around the middle of the laser line of the sensor.  
 
-* **`~invert_z`** ([std_srvs/SetBool]
+* **`invert_z`** ([std_srvs/SetBool]
 
 	Flip the Z values around the middle of the measuring range of the sensor. Factory default value of of this setting is `True`.
 
@@ -141,7 +141,7 @@ The following parameters are available to allow using multiple scanCONTROL devic
 
 	Define a custom name for the topic to publish the point cloud data on. 
 
-* **`frame_id`** (string, default: `scancontrol`)
+* **`frame_id`** (string, default: `optical_frame`)
 
 	Define a custom name for the measurement frame in which the point clouds are published.
 

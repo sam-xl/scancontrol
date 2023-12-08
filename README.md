@@ -44,9 +44,10 @@ Run the uninstall script and follow the instruction in the command window:
 #### Building
 
 To build from source, clone the latest version from this repository into your catkin workspace and compile the package using:
-
+	
+	source /opt/ros/noetic/setup.bash
 	cd catkin_ws/src
-	git clone https://github.com/sam-xl/micro_epsilon_scancontrol.git
+	git clone https://github.com/sam-xl/scancontrol.git
 	cd ../
 	catkin build
 
@@ -59,6 +60,14 @@ Run the unit tests with
  -->
 
 ## Usage
+
+Source the build packages from the repo:
+
+    source devel/setup.bash
+
+Set the path for libllt binaries:
+
+    export PATH=$PATH:/usr/lib:/lib:/usr/local/lib
 
 Run the main driver node with:
 

@@ -64,12 +64,19 @@ RUN mkdir /library_pkgs && \
     mv "/scanCONTROL-Linux-SDK/libmescan/builddir/mescan_${SCANCONTROL_SDK_VERSION}-1_amd64.deb" /library_pkgs && \
     mv "/scanCONTROL-Linux-SDK/libllt/builddir/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb" /library_pkgs
 
-FROM ros:noetic-ros-core
+FROM osrf/ros:noetic-desktop-full
+ARG USER=user
 ARG SCANCONTROL_SDK_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
       intltool \
       pkg-config \
+      git \
+      python3-catkin-tools \
+      ros-noetic-rosserial \ 
+      ros-noetic-actionlib-tools \
+      terminator \
+      python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build ["/library_pkgs", "/library_pkgs"]
@@ -78,5 +85,6 @@ RUN apt-get update && \
     apt install -y /library_pkgs/aravis_0.8.30-1_amd64.deb && \
     apt install /library_pkgs/mescan_${SCANCONTROL_SDK_VERSION}-1_amd64.deb && \
     apt install /library_pkgs/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* 
 
+USER ${ROS_USER}

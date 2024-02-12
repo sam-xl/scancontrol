@@ -15,7 +15,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(PkgConfig REQUIRED)
 find_package(micro_epsilon_scancontrol_msgs REQUIRED)
 
-pkg_check_modules(SCANCONTROL REQUIRED glib-2.0 aravis-0.6 mescan llt)
+pkg_check_modules(SCANCONTROL REQUIRED glib-2.0 aravis-0.8 mescan llt)
 
 include_directories(include ${SCANCONTROL_INCLUDE_DIRS}) 
 

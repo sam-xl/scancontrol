@@ -3,9 +3,9 @@
   <name>micro_epsilon_scancontrol_description</name>
   <version>0.1.0</version>
   <description>URDFs for the Micro-Epsilon scanCONTROL laser profile sensors.</description>
-  <maintainer email="riktonnaer@hotmail.com">Rik Tonnaer (Delft University of Technology)</maintainer>
+  <maintainer email="e.bernardi@tudelft.nl">Eugenio Bernardi (Delft University of Technology)</maintainer>
 
-  <license>BSD</license> 
+  <license>Apache 2.0</license> 
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

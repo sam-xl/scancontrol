@@ -3,62 +3,45 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Overview
-
 ROS device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 1.0]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
 
-**Author: D. Kroezen, E. Bernardi<br />
-Affiliation: [SAM XL](https://samxl.com/), [TU Delft](https://tudelft.nl/)<br />
-Maintainer: D. Kroezen, d.kroezen@tudelft.nl**
+Author: **D. Kroezen** \
+Affiliation: [SAM XL](https://samxl.com/), [TU Delft](https://tudelft.nl/) \
+Maintainers: 
+**D. Kroezen, d.kroezen@tudelft.nl**
+**E. Brnardi, e.bernardi@tudelft.nl**
 
-The micro_epsilon_scancontrol package has been tested under [ROS2 Humble](https://docs.ros.org/en/humble/index.html) and Ubuntu 22.04.3 Jammy LTS.
+> [!WARNING]  
+> This micro_epsilon_scancontrol package branch **is under development** for [ROS2 Humble](https://docs.ros.org/en/humble/index.html) and Ubuntu 22.04 Jammy!
+
 
 ## Installation
 
 #### Dependencies
-
 - [Aravis 0.8.x](https://github.com/AravisProject/aravis/releases) [[docs]](https://aravisproject.github.io/aravis/)
 - [scanCONTROL Linux C++ SDK 1.0.x](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
 
 #### Building
+To build from source, clone the latest version from this repository into your workspace and compile the package:
 
-To build from source, clone the latest version from this repository into your catkin workspace and compile the package using:
-
-	cd catkin_ws/src
-	git clone https://github.com/sam-xl/micro_epsilon_scancontrol.git
-	cd ../
-	catkin build
-
-
-<!-- ### Unit Tests
-
-Run the unit tests with
-
-	catkin_make run_tests_ros_package_template
- -->
-
-## Usage
-
-Run the main driver node with:
-
-	roslaunch micro_epsilon_scancontrol_driver load_driver.launch
-
-<!-- ## Config files
-
-* **partial_profile.yaml** Configure custom partial profile settings at start-up. The default values only extract the xyz values from the measurement buffer. Adjust at your own risk! 
-	- start_point: 
-	- start_point_data: 
-	- point_count - Number of data points, defaults to -1 (Inherit from resolution)
-	- data_width:  -->
-
-## Launch files
-
-* **driver.launch:** Launch a single scanCONTROL driver node and the configuration window. 
-<!-- 
-     Arguments
-
-     - **`show_rqt_plugin`** Display the rqt plugin to reconfigure the sensor on start-up. Default: `true`. -->
+```bash
+mkdir -p ros2_ws/src && cd ros2_ws/src
+git clone https://github.com/sam-xl/micro_epsilon_scancontrol.git -b ros2-devel
+cd ..
+colcon build
+```
 
 ## Nodes
+### scancontrol_description_node
+Visualise the scanCONTROL models
+```bash
+ros2 launch micro_epsilon_scancontrol_description load_scancontrol.launch.py
+```
+
+Possible models passed as arguments with `scancontrol_type:=`
+- `scancontrol_26x0_29x0_25.xacro` (default)
+- `scancontrol_27x0_100.xacro`
+- `scancontrol_30xx_25.xacro`
 
 ### scancontrol_driver_node
 
@@ -72,7 +55,8 @@ The scancontrol_driver_node connects to the scanCONTROL device and allows contro
 
 
 #### Services
-Most servives are wrappers of the scanCONTROL API. For more information on the available settings and values see the documentation as part of the [scanCONTROL Linux C++ SDK 0.2](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/). The rqt plugin uses these services to change the settings during runtime. 
+Most servives are wrappers of the scanCONTROL API.
+The rqt plugin uses these services to change the settings during runtime. 
 
 * **`~set_feature`** ([micro_epsilon_scancontrol_msgs/SetFeature])
 

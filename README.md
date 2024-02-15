@@ -9,7 +9,7 @@ Author: **D. Kroezen** \
 Affiliation: [SAM XL](https://samxl.com/), [TU Delft](https://tudelft.nl/) \
 Maintainers: 
 **D. Kroezen, d.kroezen@tudelft.nl**
-**E. Brnardi, e.bernardi@tudelft.nl**
+**E. Bernardi, e.bernardi@tudelft.nl**
 
 > [!WARNING]  
 > This micro_epsilon_scancontrol package branch **is under development** for [ROS2 Humble](https://docs.ros.org/en/humble/index.html) and Ubuntu 22.04 Jammy!

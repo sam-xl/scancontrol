@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>micro_epsilon_scancontrol_driver</name>
-  <version>0.0.1</version>
-  <description>Micro Espsilon scanCONTROL sensor driver</description>
-  <maintainer email="r.tonnear@tudelft.nl">Rik Tonnear</maintainer>
+  <version>0.1.0</version>
+  <description>Micro Espsilon scanCONTROL driver</description>
+
   <maintainer email="d.kroezen@tudelft.nl">Dave Kroezen</maintainer>
 
   <url type="repository">https://github.com/sam-xl/scancontrol</url>

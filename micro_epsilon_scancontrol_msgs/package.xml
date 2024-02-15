@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>micro_epsilon_scancontrol_msgs</name>
-  <version>0.0.1</version>
-  <description>Micro Espsilon scanCONTROL Driver Messages</description>
+  <version>0.1.0</version>
+  <description>Micro Espsilon scanCONTROL driver messages</description>
   
-  <maintainer email="r.tonnear@tudelft.nl">Rik Tonnear</maintainer>
   <maintainer email="d.kroezen@tudelft.nl">Dave Kroezen</maintainer>
 
-  <url type="repository">https://gitlab.tudelft.nl/dasml/micro_epsilon_scancontrol</url>
+  <url type="repository">https://github.com/sam-xl/scancontrol</url>
 
-  <license>BSD</license>
+  <license>Apache 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

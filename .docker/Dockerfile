@@ -1,6 +1,6 @@
 ARG SCANCONTROL_SDK_VERSION=1.0.0
 
-FROM ubuntu:focal AS build
+FROM ubuntu:22.04 AS build
 
 ARG SCANCONTROL_SDK_VERSION
 ARG DEBIAN_FRONTEND=noninteractive
@@ -31,8 +31,8 @@ RUN apt-get update && \
       unzip \
       wget \
       xsltproc \
-    && rm -rf /var/lib/apt/lists/* && \
-    pip3 install meson
+      meson \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN wget https://github.com/AravisProject/aravis/releases/download/0.8.30/aravis-0.8.30.tar.xz -O aravis-0.8.30.tar.xz &&\
     tar xfJ aravis-0.8.30.tar.xz && \
@@ -53,6 +53,9 @@ RUN wget https://software.micro-epsilon.com/scanCONTROL-Linux-SDK-${SCANCONTROL_
     ninja && \
     checkinstall --pkgname mescan --pkgversion ${SCANCONTROL_SDK_VERSION} --requires="aravis \(\>= 0.8.0\)" ninja install && \
     ldconfig && \
+    cd /scanCONTROL-Linux-SDK/libllt/include && \
+    # scanCONTROL SDK fix for libglib 
+    sed -i '27,29 s/^/\/\/ /; 31,33 s/^/\/\/ /;' llt.h && \
     cd /scanCONTROL-Linux-SDK/libllt && \
     meson builddir && \
     cd builddir && \
@@ -64,12 +67,12 @@ RUN mkdir /library_pkgs && \
     mv "/scanCONTROL-Linux-SDK/libmescan/builddir/mescan_${SCANCONTROL_SDK_VERSION}-1_amd64.deb" /library_pkgs && \
     mv "/scanCONTROL-Linux-SDK/libllt/builddir/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb" /library_pkgs
 
-FROM ros:noetic-ros-core
+FROM ros:humble-ros-core
 ARG SCANCONTROL_SDK_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
-      intltool \
-      pkg-config \
+    build-essential \
+    pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build ["/library_pkgs", "/library_pkgs"]

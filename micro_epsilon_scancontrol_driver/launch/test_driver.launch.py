@@ -39,7 +39,7 @@ def generate_launch_description():
         launch.actions.IncludeLaunchDescription(
             launch.launch_description_sources.PythonLaunchDescriptionSource(
                 os.path.join(get_package_share_directory(
-                    'micro_epsilon_scancontrol_description'), 'launch/load_scancontrol_26x0_29x0_25.launch.py')
+                    'micro_epsilon_scancontrol_description'), 'launch/load_scancontrol.launch.py')
             )
         )
     ])

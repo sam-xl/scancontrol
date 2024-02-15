@@ -17,13 +17,9 @@
   <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
   <depend>sensor_msgs</depend>
-  <!-- <depend>nodelet</depend> -->
 
   <depend>micro_epsilon_scancontrol_msgs</depend>
 
-  <!-- <export>
-    <nodelet plugin="${prefix}/me_scancontrol_nodelet.xml"/>
-  </export> -->
   <export>
     <build_type>ament_cmake</build_type>
   </export>

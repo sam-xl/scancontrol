@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     user: ros
-    working_dir: /home/ros/workspace/
+    working_dir: /home/ros/workspace
     # command: >
     #   sh -c "sudo apt-get update &&
     #         rosdep update &&
@@ -31,7 +31,7 @@ services:
       # Uncomment to expose graphic card drivers
       # - NVIDIA_DRIVER_CAPABILITIES=all
     volumes:
-      - ../../:/home/ros/workspace/src
+      - ../../../:/home/ros/workspace
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority

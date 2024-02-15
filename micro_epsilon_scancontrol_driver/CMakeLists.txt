@@ -32,9 +32,6 @@ ament_target_dependencies(driver_node
 target_link_libraries(driver_node
  "${SCANCONTROL_LIBRARIES}")
 
-# add_library(driver_nodelet src/nodelet.cpp src/driver.cpp)
-# target_link_libraries(driver_nodelet ${catkin_LIBRARIES} ${scancontrol_LIBRARIES})
-
 install(TARGETS driver_node
   DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY include/
@@ -45,6 +42,5 @@ install(DIRECTORY
 )
 ament_export_include_directories(include)
 ament_export_libraries(driver_node ) #driver_nodelet
-# ament_export_dependencies()
 
 ament_package()

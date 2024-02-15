@@ -1,0 +1,43 @@
+version: '3'
+
+name: scancontrol-compose
+services:
+  scancontrol-service:
+    container_name: scancontrol-container
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    user: ros
+    working_dir: /home/ros/workspace/
+    # command: >
+    #   sh -c "sudo apt-get update &&
+    #         rosdep update &&
+    #         rosdep install --from-paths . --ignore-src -y &&
+    #         source /opt/ros/humble/setup.bash &&
+    #         colcon build --merge-install --symlink-install --cmake-args "-DCMAKE_BUILD_TYPE=RelWithDebInfo" "-DCMAKE_EXPORT_COMPILE_COMMANDS=On" -Wall -Wextra -Wpedantic &&
+    #         . install/setup.bash"
+    # Uncomment to expose graphic card drivers
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
+      # Uncomment to expose graphic card drivers
+      # - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      - ../../:/home/ros/workspace/src
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority
+      # Uncomment to use git within the devcontainer
+      # - ~/.ssh/:/home/ros/.ssh/
+    network_mode: "host" #TODO: UNSAFE, change to specific port!
+    tty: true
+    init: true
+    

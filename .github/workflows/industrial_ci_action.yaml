@@ -7,13 +7,13 @@ jobs:
     strategy:
       matrix:
         env:
-          - {OS_NAME: ubuntu, OS_CODE_NAME: bionic, ROS_DISTRO: melodic, DOCKER_IMAGE: "samxl/scancontrol:latest"}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: jammy, ROS_DISTRO: humble, DOCKER_IMAGE: "eugeniobernard/scancontrol2:sdk_v1.0.0"}
     env:
       CCACHE_DIR: /github/home/.ccache
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v3
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}

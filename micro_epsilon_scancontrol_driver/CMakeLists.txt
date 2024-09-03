@@ -19,7 +19,7 @@ pkg_check_modules(SCANCONTROL REQUIRED glib-2.0 aravis-0.8 mescan llt)
 
 include_directories(include ${SCANCONTROL_INCLUDE_DIRS}) 
 
-add_executable(driver_node src/node.cpp src/driver.cpp src/keyboard_control.cpp)
+add_executable(driver_node src/node.cpp src/driver.cpp)
 ament_target_dependencies(driver_node 
   rclcpp
   std_srvs

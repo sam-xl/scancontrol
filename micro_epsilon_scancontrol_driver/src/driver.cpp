@@ -1,5 +1,4 @@
 #include "micro_epsilon_scancontrol_driver/driver.h"
-#include <std_msgs/msg/string.hpp>
 
 namespace scancontrol_driver
 {
@@ -243,12 +242,20 @@ namespace scancontrol_driver
 
 
         // Advertise subscriber
-        // Initialize subscriber to listen to the "keydown" topic
-        keydown_subscriber_ = nh_->create_subscription<std_msgs::msg::String>(
-            "keydown", 
+        // Initialize subscriber to listen to the "laser_switch" topic
+        laser_on_subscript = nh_->create_subscription<std_msgs::msg::Empty>(
+            "laseron", 
             10, 
-            [this](const std_msgs::msg::String::SharedPtr msg) {
-                this->keydown_callback(msg);
+            [this](const std_msgs::msg::Empty::SharedPtr msg) {
+                this->laser_on_callback(msg);
+            }
+        );
+
+        laser_off_subscript = nh_->create_subscription<std_msgs::msg::Empty>(
+            "laseroff", 
+            10, 
+            [this](const std_msgs::msg::Empty::SharedPtr msg) {
+                this->laser_off_callback(msg);
             }
         );
 
@@ -584,33 +591,18 @@ namespace scancontrol_driver
         rclcpp::shutdown();
     }
 
-    void ScanControlDriver::keydown_callback(const std_msgs::msg::String::SharedPtr msg)
+    void ScanControlDriver::laser_on_callback(const std_msgs::msg::Empty::SharedPtr msg)
     {
-        RCLCPP_INFO(LOGGER, "Received keydown message: %s", msg->data.c_str());
+        RCLCPP_INFO(LOGGER, "Received 'laseron' Message");
+        SetFeature(FEATURE_FUNCTION_LASERPOWER, 2);
+        RCLCPP_INFO(LOGGER, "Laser turned ON");
+    }
 
-        if (!msg->data.empty()) {
-            char command = msg->data[0];
-            
-            if (command == '2')
-            {
-                SetFeature(FEATURE_FUNCTION_LASERPOWER, 2);
-                RCLCPP_INFO(LOGGER, "Laser turned ON");
-            }
-            else if (command == '0')
-            {
-                SetFeature(FEATURE_FUNCTION_LASERPOWER, 0);
-                RCLCPP_INFO(LOGGER, "Laser turned OFF");
-            }
-            else if (command == 'q')
-            {
-                RCLCPP_INFO(LOGGER, "Exiting...");
-                rclcpp::shutdown();
-            }
-
-
-        } else {
-            RCLCPP_WARN(LOGGER, "Received an empty keydown message.");
-        }
+    void ScanControlDriver::laser_off_callback(const std_msgs::msg::Empty::SharedPtr msg)
+    {
+        RCLCPP_INFO(LOGGER, "Received 'laseroff' Message");
+        SetFeature(FEATURE_FUNCTION_LASERPOWER, 0);
+        RCLCPP_INFO(LOGGER, "Laser turned OFF");
     }
 
 } // namespace scancontrol_driver

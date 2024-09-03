@@ -1,6 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
 #include "micro_epsilon_scancontrol_driver/driver.h"
-#include "micro_epsilon_scancontrol_driver/keyboard_control.h"
 #include <thread>
 
 static const rclcpp::Logger logger = rclcpp::get_logger("scancontrol_driver");

@@ -16,7 +16,9 @@
 #include <micro_epsilon_scancontrol_msgs/srv/get_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_available_resolutions.hpp>
-#include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/empty.hpp>
+
+
 
 #include <llt.h>
 #include <mescan.h>
@@ -108,10 +110,12 @@ namespace scancontrol_driver
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>::SharedPtr get_available_resolutions_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
-            rclcpp::Subscription<std_msgs::msg::String>::SharedPtr keydown_subscriber_;
+            rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr laser_on_subscript;
+            rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr laser_off_subscript;
 
             //Keyboard Subscription
-            void keydown_callback(const std_msgs::msg::String::SharedPtr msg);
+            void laser_on_callback(const std_msgs::msg::Empty::SharedPtr msg);
+            void laser_off_callback(const std_msgs::msg::Empty::SharedPtr msg);
 
 
             // Driver objects

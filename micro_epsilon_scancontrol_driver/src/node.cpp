@@ -1,5 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "micro_epsilon_scancontrol_driver/driver.h"
+#include "micro_epsilon_scancontrol_driver/keyboard_control.h"
+#include <thread>
 
 static const rclcpp::Logger logger = rclcpp::get_logger("scancontrol_driver");
 
@@ -17,6 +19,11 @@ int main(int argc, char** argv)
 
         //Turn On Laser
         driver.SetFeature(FEATURE_FUNCTION_LASERPOWER,2);
+
+        //start keyboard thread
+        std::thread keyboard_thread(handle_keyboard_input, std::ref(driver));
+
+
         // Loop driver until shutdown
         driver.StartProfileTransfer();
         while(rclcpp::ok())
@@ -27,6 +34,14 @@ int main(int argc, char** argv)
         //Turn Off Laser
         driver.SetFeature(FEATURE_FUNCTION_LASERPOWER,0);
         driver.StopProfileTransfer();
+
+        if (keyboard_thread.joinable())
+        {
+            keyboard_thread.join();
+        }
+
+
+
         return 0;
     }
     catch(const std::runtime_error& error)

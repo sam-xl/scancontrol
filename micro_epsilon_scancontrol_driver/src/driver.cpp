@@ -50,6 +50,10 @@ namespace scancontrol_driver
         gint32 interface_count  = 0;
         std::vector<char *> available_interfaces(MAX_DEVICE_INTERFACE_COUNT);
 
+        for (int i=0; i < 7; i++) {
+            RCLCPP_INFO_STREAM(LOGGER, "Available interface: " << available_interfaces[i]);
+        }
+
         return_code = device_interface_ptr->GetDeviceInterfaces(&available_interfaces[0], MAX_DEVICE_INTERFACE_COUNT);
         if (return_code == ERROR_GETDEVINTERFACE_REQUEST_COUNT){
             RCLCPP_WARN_STREAM(LOGGER, "There are more than " << MAX_DEVICE_INTERFACE_COUNT << " scanCONTROL sensors connected.");

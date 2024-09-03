@@ -85,7 +85,7 @@ def generate_launch_description():
         package="rviz2",
         executable="rviz2",
         name="rviz2",
-        output="log",
+        output="screen",
         arguments=[
             "-d",
             get_package_share_directory("micro_epsilon_scancontrol_description")

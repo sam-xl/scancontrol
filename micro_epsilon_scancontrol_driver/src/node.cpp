@@ -15,12 +15,17 @@ int main(int argc, char** argv)
         scancontrol_driver::ScanControlDriver driver(node, private_node);
         RCLCPP_INFO(logger, "Driver started");
 
+        //Turn On Laser
+        driver.SetFeature(FEATURE_FUNCTION_LASERPOWER,2);
         // Loop driver until shutdown
         driver.StartProfileTransfer();
         while(rclcpp::ok())
         {
             rclcpp::spin_some(node);
         }
+
+        //Turn Off Laser
+        driver.SetFeature(FEATURE_FUNCTION_LASERPOWER,0);
         driver.StopProfileTransfer();
         return 0;
     }

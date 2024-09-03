@@ -20,10 +20,6 @@ int main(int argc, char** argv)
         //Turn On Laser
         driver.SetFeature(FEATURE_FUNCTION_LASERPOWER,2);
 
-        //start keyboard thread
-        std::thread keyboard_thread(handle_keyboard_input, std::ref(driver));
-
-
         // Loop driver until shutdown
         driver.StartProfileTransfer();
         while(rclcpp::ok())
@@ -34,13 +30,6 @@ int main(int argc, char** argv)
         //Turn Off Laser
         driver.SetFeature(FEATURE_FUNCTION_LASERPOWER,0);
         driver.StopProfileTransfer();
-
-        if (keyboard_thread.joinable())
-        {
-            keyboard_thread.join();
-        }
-
-
 
         return 0;
     }

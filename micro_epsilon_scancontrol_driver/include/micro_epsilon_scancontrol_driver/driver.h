@@ -16,6 +16,7 @@
 #include <micro_epsilon_scancontrol_msgs/srv/get_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_available_resolutions.hpp>
+#include <std_msgs/msg/string.hpp>
 
 #include <llt.h>
 #include <mescan.h>
@@ -107,7 +108,10 @@ namespace scancontrol_driver
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>::SharedPtr get_available_resolutions_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
+            rclcpp::Subscription<std_msgs::msg::String>::SharedPtr keydown_subscriber_;
 
+            //Keyboard Subscription
+            void keydown_callback(const std_msgs::msg::String::SharedPtr msg);
 
 
             // Driver objects
@@ -156,12 +160,13 @@ namespace scancontrol_driver
             };
 
             //
+
+
             std::list<unsigned int> features_with_corruption_risk = {FEATURE_FUNCTION_LASERPOWER, FEATURE_FUNCTION_MEASURINGFIELD, FEATURE_FUNCTION_TRIGGER}; 
     };
 
     void NewProfileCallback(const void * data, size_t data_size, gpointer user_data);
     void ControlLostCallback(ArvGvDevice *mydevice, gpointer user_data);
-
 } // namespace scancontrol_driver
 
 #endif // _SCANCONTROL_DRIVER_H_

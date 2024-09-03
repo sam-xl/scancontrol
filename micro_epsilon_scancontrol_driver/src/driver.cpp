@@ -1,4 +1,5 @@
 #include "micro_epsilon_scancontrol_driver/driver.h"
+#include <std_msgs/msg/string.hpp>
 
 namespace scancontrol_driver
 {
@@ -237,6 +238,20 @@ namespace scancontrol_driver
 
         // Advertise topic
         publisher = nh_->create_publisher<sensor_msgs::msg::PointCloud2>(config_.topic_name, 10);
+
+
+
+
+        // Advertise subscriber
+        // Initialize subscriber to listen to the "keydown" topic
+        keydown_subscriber_ = nh_->create_subscription<std_msgs::msg::String>(
+            "keydown", 
+            10, 
+            [this](const std_msgs::msg::String::SharedPtr msg) {
+                this->keydown_callback(msg);
+            }
+        );
+
 
         using std::placeholders::_1;
         using std::placeholders::_2;
@@ -567,6 +582,35 @@ namespace scancontrol_driver
     void ControlLostCallback(ArvGvDevice *mydevice, gpointer user_data){
         RCLCPP_FATAL(LOGGER, "Conrol of scanCONTROL device lost!");
         rclcpp::shutdown();
+    }
+
+    void ScanControlDriver::keydown_callback(const std_msgs::msg::String::SharedPtr msg)
+    {
+        RCLCPP_INFO(LOGGER, "Received keydown message: %s", msg->data.c_str());
+
+        if (!msg->data.empty()) {
+            char command = msg->data[0];
+            
+            if (command == '2')
+            {
+                SetFeature(FEATURE_FUNCTION_LASERPOWER, 2);
+                RCLCPP_INFO(LOGGER, "Laser turned ON");
+            }
+            else if (command == '0')
+            {
+                SetFeature(FEATURE_FUNCTION_LASERPOWER, 0);
+                RCLCPP_INFO(LOGGER, "Laser turned OFF");
+            }
+            else if (command == 'q')
+            {
+                RCLCPP_INFO(LOGGER, "Exiting...");
+                rclcpp::shutdown();
+            }
+
+
+        } else {
+            RCLCPP_WARN(LOGGER, "Received an empty keydown message.");
+        }
     }
 
 } // namespace scancontrol_driver

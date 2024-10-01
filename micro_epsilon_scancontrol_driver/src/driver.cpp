@@ -287,8 +287,8 @@ namespace scancontrol_driver
         point_cloud_msg.reset(new point_cloud_t);
         point_cloud_msg->header.frame_id = config_.frame_id;
         point_cloud_msg->height = 1;
-        point_cloud_msg->width = config_.resolution;
-        for (int i=0; i<config_.resolution; i++){
+        point_cloud_msg->width = resolution;
+        for (int i=0; i<resolution; i++){
             pcl::PointXYZI point(1.0);
             point_cloud_msg->points.push_back(point);
         }
@@ -419,23 +419,29 @@ namespace scancontrol_driver
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Request> request,
         std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Response> response)
     {
-        if (response->return_code = StopProfileTransfer() < GENERAL_FUNCTION_OK){
-            // return true;
+        response->return_code = StopProfileTransfer();
+        if (response->return_code < GENERAL_FUNCTION_OK){
+            RCLCPP_WARN_STREAM(LOGGER, "Error while stopping transmission! Code: " << response->return_code);
+            return;
         }
-        if (response->return_code = device_interface_ptr->SetResolution(request->resolution) < GENERAL_FUNCTION_OK){
+        response->return_code = device_interface_ptr->SetResolution(request->resolution);
+        if (response->return_code < GENERAL_FUNCTION_OK){
             RCLCPP_WARN_STREAM(LOGGER, "Error while setting device resolution! Code: " << response->return_code);
             // return true;
         }
         int temp_resolution = request->resolution;
-        if (response->return_code = SetPartialProfile(temp_resolution) < GENERAL_FUNCTION_OK){
+        response->return_code = SetPartialProfile(temp_resolution);
+        if (response->return_code < GENERAL_FUNCTION_OK){
             RCLCPP_WARN_STREAM(LOGGER, "Error while setting partial profile. Code: " << response->return_code);
-            // return true;
+            return;
         }
-        if (response->return_code = StartProfileTransfer() < GENERAL_FUNCTION_OK){
-            // return true;
+        response->return_code = StartProfileTransfer();
+        if (response->return_code < GENERAL_FUNCTION_OK){
+            RCLCPP_WARN_STREAM(LOGGER, "Error while starting transmission! Code: " << response->return_code);
+            return;
         }
 
-        // Change of resolution was succesull
+        // // Change of resolution was succesull
         config_.resolution = request->resolution;
         // return true;
     }

@@ -16,8 +16,8 @@ namespace scancontrol_driver
         this->get_parameter_or("resolution", config_.resolution, -1);
 
         // Multiple device parameters        
-        this->declare_parameter<std::string>("serial", std::string("MICRO-EPSILON Optronic GmbH-scanCONTROL 3060-25 -519080050"));
-        this->get_parameter_or("serial", config_.serial, std::string("MICRO-EPSILON Optronic GmbH-scanCONTROL 3060-25 -519080050"));
+        this->declare_parameter<std::string>("serial", std::string(""));
+        this->get_parameter_or("serial", config_.serial, std::string(""));
         this->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
         this->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
         this->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));

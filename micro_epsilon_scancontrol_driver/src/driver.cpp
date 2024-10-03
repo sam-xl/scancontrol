@@ -250,6 +250,15 @@ namespace scancontrol_driver
             "~/invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
         invert_x_srv = this->create_service<std_srvs::srv::SetBool>(
             "~/invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
+        set_exposure_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetTime>(
+            "~/set_exposure_time", std::bind(&ScanControlDriver::ServiceSetExposureTime, this, _1, _2));
+        get_exposure_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetTime>(
+            "~/get_exposure_time", std::bind(&ScanControlDriver::ServiceGetExposureTime, this, _1, _2));
+        set_idle_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetTime>(
+            "~/set_idle_time", std::bind(&ScanControlDriver::ServiceSetIdleTime, this, _1, _2));
+        get_idle_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetTime>(
+            "~/get_idle_time", std::bind(&ScanControlDriver::ServiceGetIdleTime, this, _1, _2));
+
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){
@@ -360,7 +369,8 @@ namespace scancontrol_driver
     /* Retrieve the current value of a setting/feature. Consult the scanCONTROL API documentation for a list of available features */ 
     int ScanControlDriver::GetFeature(unsigned int setting_id, unsigned int *value){
         int return_code = 0;
-        if (return_code = device_interface_ptr->GetFeature(setting_id, value) < GENERAL_FUNCTION_OK){
+        return_code = device_interface_ptr->GetFeature(setting_id, value);
+        if (return_code < GENERAL_FUNCTION_OK){
             RCLCPP_WARN_STREAM(LOGGER, "Setting could not be retrieved. Code: " << return_code);
             return return_code;
         }
@@ -552,6 +562,100 @@ namespace scancontrol_driver
         response->success = true;
 
         // return true;
+    }  
+
+    // Generic function for setting a times like exposure and idle time.
+    // setting_id: 
+    // value: time in microseconds. min: 1 mus, max: 40950 mus ;  eg. 1005 = 1.005ms
+    int ScanControlDriver::SetTime(unsigned int setting_id, unsigned int value){
+        int ret_code;
+
+        // encoded value in 1 mus steps. 
+        uint32_t remainder = ((value % 10) << 12) & 0xF000; // Remainder is left shifted first and bits 0-12 are masked. the quotient will occupy this area.
+        uint32_t quotient = ((value / 10)) & 0xFFF; // take the quotient and mask bits 12-15
+        uint32_t value_encoded = remainder + quotient; 
+
+        ret_code = SetFeature(setting_id, value_encoded); 
+        
+        // success if value was sent AND set.
+        if (ret_code < GENERAL_FUNCTION_OK){
+            RCLCPP_INFO_STREAM(LOGGER, "SetFeature failed.");
+            return ret_code;
+        }
+        
+        unsigned int actual_value = 0;
+        ret_code = GetTime(setting_id, &actual_value);
+        if (actual_value != value){
+            RCLCPP_INFO(LOGGER, "Requested value and actual value do not match. ");
+            return ret_code;
+        }
+        return GENERAL_FUNCTION_OK;
+    }
+
+    int ScanControlDriver::GetTime(unsigned int setting_id, unsigned int* value){
+        int ret_code = 0;
+        ret_code = GetFeature(setting_id, value);
+        
+        if (ret_code < GENERAL_FUNCTION_OK){
+            return ret_code;
+        }
+
+        // Decode
+        uint32_t quotient = *value & 0xFFF;               // Extract ExposureTime / 10
+        uint32_t remainder = (*value >> 12) & 0xF;        // Extract ExposureTime % 10
+        *value = (quotient * 10) + remainder;  // Reconstruct ExposureTime
+
+        return GENERAL_FUNCTION_OK;
+
+    }
+
+
+    // a wrapper on setfeature to use proper encoding 
+    void ScanControlDriver::ServiceSetExposureTime(
+        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response){
+        
+        int ret_code = SetTime(FEATURE_FUNCTION_EXPOSURE_TIME, request->time);
+
+        if (ret_code < GENERAL_FUNCTION_OK){
+            RCLCPP_INFO_STREAM(LOGGER, "Setting exposure time failed with error code: "<<ret_code);
+            response->success = false;
+        }
+        else{
+            response->success = true;
+        }
+        response->return_code = ret_code;
+    }
+
+    // a wrapper on getfeature to use proper decoding
+    void ScanControlDriver::ServiceGetExposureTime(
+        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response){
+        response->return_code = GetTime(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->time));
+    }
+
+        // a wrapper on setfeature to use proper encoding 
+    void ScanControlDriver::ServiceSetIdleTime(
+        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response){
+        
+        int ret_code = SetTime(FEATURE_FUNCTION_IDLE_TIME, request->time);
+
+        if (ret_code < GENERAL_FUNCTION_OK){
+            RCLCPP_INFO_STREAM(LOGGER, "Setting idle time failed with error code: "<<ret_code);
+            response->success = false;
+        }
+        else{
+            response->success = true;
+        }
+        response->return_code = ret_code;
+    }
+
+    // a wrapper on getfeature to use proper decoding
+    void ScanControlDriver::ServiceGetIdleTime(
+        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
+        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response){
+        response->return_code = GetTime(FEATURE_FUNCTION_IDLE_TIME, &(response->time));
     }  
 
     /* Callback for when a new profile is read, for use with the scanCONTROL API. */

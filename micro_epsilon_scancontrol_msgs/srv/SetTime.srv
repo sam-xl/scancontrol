@@ -1,0 +1,4 @@
+uint32 time
+---
+int32 return_code
+int32 success

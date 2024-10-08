@@ -16,6 +16,8 @@
 #include <micro_epsilon_scancontrol_msgs/srv/get_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_available_resolutions.hpp>
+#include <micro_epsilon_scancontrol_msgs/srv/get_time.hpp>
+#include <micro_epsilon_scancontrol_msgs/srv/set_time.hpp>
 
 #include <llt.h>
 #include <mescan.h>
@@ -47,6 +49,9 @@ namespace scancontrol_driver
             // Device setting functions
             int GetFeature(unsigned int setting_id, unsigned int *value);
             int SetFeature(unsigned int setting_id, unsigned int value);
+            // specialised features specific to encoding/decoding pattern
+            int SetTime(unsigned int setting_id, unsigned int value);
+            int GetTime(unsigned int setting_id, unsigned int* value);
 
             // Get configuration parameters 
             std::string serial() const {return config_.serial;};
@@ -74,7 +79,19 @@ namespace scancontrol_driver
             void ServiceInvertX(
                 const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
                 std::shared_ptr<std_srvs::srv::SetBool::Response> response);
-    
+            void ServiceSetExposureTime(
+                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response);
+            void ServiceGetExposureTime(
+                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response);
+            void ServiceSetIdleTime(
+                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response);
+            void ServiceGetIdleTime(
+                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
+                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response);
+            
         private:
             // Profile functions
             int Profile2PointCloud();
@@ -103,6 +120,10 @@ namespace scancontrol_driver
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetResolution>::SharedPtr get_resolution_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetResolution>::SharedPtr set_resolution_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>::SharedPtr get_available_resolutions_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetTime>::SharedPtr set_exposure_time_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetTime>::SharedPtr get_exposure_time_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetTime>::SharedPtr set_idle_time_srv;
+            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetTime>::SharedPtr get_idle_time_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
 

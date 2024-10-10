@@ -451,7 +451,7 @@ namespace scancontrol_driver
             return;
         }
 
-        // // Change of resolution was succesull
+        // Change of resolution was successful
         config_.resolution = request->resolution;
         // return true;
     }
@@ -570,23 +570,26 @@ namespace scancontrol_driver
     int ScanControlDriver::SetTime(unsigned int setting_id, unsigned int value){
         int ret_code;
 
+        // detailed docs about encoding and decoding here: https://samxl.atlassian.net/l/cp/3fr1eQD0
+
         // encoded value in 1 mus steps. 
         uint32_t remainder = ((value % 10) << 12) & 0xF000; // Remainder is left shifted first and bits 0-12 are masked. the quotient will occupy this area.
         uint32_t quotient = ((value / 10)) & 0xFFF; // take the quotient and mask bits 12-15
-        uint32_t value_encoded = remainder + quotient; 
+        uint32_t encoded_value = remainder + quotient; 
 
-        ret_code = SetFeature(setting_id, value_encoded); 
+        ret_code = SetFeature(setting_id, encoded_value); 
         
         // success if value was sent AND set.
         if (ret_code < GENERAL_FUNCTION_OK){
-            RCLCPP_INFO_STREAM(LOGGER, "SetFeature failed.");
+            RCLCPP_ERROR_STREAM(LOGGER, "SetFeature failed. Return code:"<<ret_code);
             return ret_code;
         }
         
+        // Check if returned value from laser matches the request
         unsigned int actual_value = 0;
         ret_code = GetTime(setting_id, &actual_value);
         if (actual_value != value){
-            RCLCPP_INFO(LOGGER, "Requested value and actual value do not match. ");
+            RCLCPP_WARN(LOGGER, "Requested value and actual value do not match. ");
             return ret_code;
         }
         return GENERAL_FUNCTION_OK;
@@ -597,10 +600,13 @@ namespace scancontrol_driver
         ret_code = GetFeature(setting_id, value);
         
         if (ret_code < GENERAL_FUNCTION_OK){
+            RCLCPP_ERROR_STREAM(LOGGER, "GetFeature failed. Return code: "<<ret_code);
             return ret_code;
         }
 
         // Decode
+        // detailed docs about encoding and decoding here: https://samxl.atlassian.net/l/cp/3fr1eQD0
+
         uint32_t quotient = *value & 0xFFF;               // Extract ExposureTime / 10
         uint32_t remainder = (*value >> 12) & 0xF;        // Extract ExposureTime % 10
         *value = (quotient * 10) + remainder;  // Reconstruct ExposureTime
@@ -616,14 +622,7 @@ namespace scancontrol_driver
         std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response){
         
         int ret_code = SetTime(FEATURE_FUNCTION_EXPOSURE_TIME, request->time);
-
-        if (ret_code < GENERAL_FUNCTION_OK){
-            RCLCPP_INFO_STREAM(LOGGER, "Setting exposure time failed with error code: "<<ret_code);
-            response->success = false;
-        }
-        else{
-            response->success = true;
-        }
+        response->success = !(ret_code < GENERAL_FUNCTION_OK);
         response->return_code = ret_code;
     }
 
@@ -632,6 +631,7 @@ namespace scancontrol_driver
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
         std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response){
         response->return_code = GetTime(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->time));
+        response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }
 
         // a wrapper on setfeature to use proper encoding 
@@ -640,14 +640,7 @@ namespace scancontrol_driver
         std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response){
         
         int ret_code = SetTime(FEATURE_FUNCTION_IDLE_TIME, request->time);
-
-        if (ret_code < GENERAL_FUNCTION_OK){
-            RCLCPP_INFO_STREAM(LOGGER, "Setting idle time failed with error code: "<<ret_code);
-            response->success = false;
-        }
-        else{
-            response->success = true;
-        }
+        response->success = !(ret_code < GENERAL_FUNCTION_OK);
         response->return_code = ret_code;
     }
 
@@ -656,6 +649,7 @@ namespace scancontrol_driver
         const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
         std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response){
         response->return_code = GetTime(FEATURE_FUNCTION_IDLE_TIME, &(response->time));
+        response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }  
 
     /* Callback for when a new profile is read, for use with the scanCONTROL API. */

@@ -1,3 +1,4 @@
 ---
-uint32 time
-int32 return_code
+uint32 time        # time in microseconds. Range: 0 - 40959
+int32 return_code  # 1 if success, otherwise errorcode from scancontrol SDK
+int32 success      # True if no errors were encountered from scancontrol SDK

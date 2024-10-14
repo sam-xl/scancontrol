@@ -1,6 +1,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "micro_epsilon_scancontrol_driver/driver.h"
-#include <thread>
+
 #include <memory>
 static const rclcpp::Logger logger = rclcpp::get_logger("scancontrol_driver");
 
@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     // Start the driver
     try
     {
-        std::shared_ptr<scancontrol_driver::ScanControlDriver> driver = std::make_shared<scancontrol_driver::ScanControlDriver>();
+        std::shared_ptr<scancontrol_driver::ScanControlDriver> driver = std::make_shared<scancontrol_driver::ScanControlDriver>("scancontrol_driver_node");
         RCLCPP_INFO(logger, "Driver started");
 
         //Turn On Laser

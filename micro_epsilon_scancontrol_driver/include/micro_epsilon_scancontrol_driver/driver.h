@@ -21,6 +21,7 @@
 
 #include <llt.h>
 #include <mescan.h>
+#include <string>
 
 #define MAX_DEVICE_INTERFACE_COUNT 6
 #define MAX_RESOLUTION_COUNT 6
@@ -37,7 +38,7 @@ namespace scancontrol_driver
     {
         public:
             // Constructor and destructor
-            ScanControlDriver();
+            ScanControlDriver(const std::string& name);
             ~ScanControlDriver() {}
             
             // Profile functions

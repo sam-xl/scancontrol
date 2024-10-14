@@ -3,9 +3,9 @@
 namespace scancontrol_driver
 {
 
-    static const rclcpp::Logger LOGGER = rclcpp::get_logger("scancontrol_driver");
+    static const rclcpp::Logger LOGGER = rclcpp::get_logger("scancontrol_driver_node");  // TODO change this into a class variable. or just use this->get_logger()?
 
-    ScanControlDriver::ScanControlDriver():Node("scancontrol_driver")
+    ScanControlDriver::ScanControlDriver(const std::string& name):Node(name)
     {   
         /* 
             Extract the relevant parameters. 

@@ -5,35 +5,33 @@ namespace scancontrol_driver
 
     static const rclcpp::Logger LOGGER = rclcpp::get_logger("scancontrol_driver");
 
-    ScanControlDriver::ScanControlDriver(rclcpp::Node::SharedPtr& nh, rclcpp::Node::SharedPtr& private_nh)
+    ScanControlDriver::ScanControlDriver():Node("scancontrol_driver")
     {   
         /* 
-            Store the ros::NodeHandle objects and extract the relevant parameters. 
+            Extract the relevant parameters. 
         */   
-        nh_         = nh;
-        private_nh_ = private_nh;
 
         // Device settings
-        private_nh_->declare_parameter<int>("resolution", -1);
-        private_nh_->get_parameter_or("resolution", config_.resolution, -1);
+        this->declare_parameter<int>("resolution", -1);
+        this->get_parameter_or("resolution", config_.resolution, -1);
 
         // Multiple device parameters        
-        private_nh_->declare_parameter<std::string>("serial", std::string(""));
-        private_nh_->get_parameter_or("serial", config_.serial, std::string(""));
-        private_nh_->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
-        private_nh_->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
-        private_nh_->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));
-        private_nh_->get_parameter_or("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
+        this->declare_parameter<std::string>("serial", std::string(""));
+        this->get_parameter_or("serial", config_.serial, std::string(""));
+        this->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
+        this->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
+        this->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));
+        this->get_parameter_or("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
 
         // TODO: Are these parameters needed?
-        private_nh_->declare_parameter<int>("partial_profile_start_point", 0);
-        private_nh_->get_parameter_or("partial_profile_start_point", config_.pp_start_point, 0);
-        private_nh_->declare_parameter<int>("partial_profile_start_point_data", 4);
-        private_nh_->get_parameter_or("partial_profile_start_point_data", config_.pp_start_point_data, 4);
-        private_nh_->declare_parameter<int>("partial_profile_point_count", -1);
-        private_nh_->get_parameter_or("partial_profile_point_count", config_.pp_point_count, -1);
-        private_nh_->declare_parameter<int>("partial_profile_data_width", 4);
-        private_nh_->get_parameter_or("partial_profile_data_width", config_.pp_point_data_width, 4);
+        this->declare_parameter<int>("partial_profile_start_point", 0);
+        this->get_parameter_or("partial_profile_start_point", config_.pp_start_point, 0);
+        this->declare_parameter<int>("partial_profile_start_point_data", 4);
+        this->get_parameter_or("partial_profile_start_point_data", config_.pp_start_point_data, 4);
+        this->declare_parameter<int>("partial_profile_point_count", -1);
+        this->get_parameter_or("partial_profile_point_count", config_.pp_point_count, -1);
+        this->declare_parameter<int>("partial_profile_data_width", 4);
+        this->get_parameter_or("partial_profile_data_width", config_.pp_point_data_width, 4);
 
         // Create driver interface object:
         device_interface_ptr = std::make_unique<CInterfaceLLT>();
@@ -232,25 +230,25 @@ namespace scancontrol_driver
             }
 
         // Advertise topic
-        publisher = nh_->create_publisher<sensor_msgs::msg::PointCloud2>(config_.topic_name, 10);
+        publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>(config_.topic_name, 10);
 
         using std::placeholders::_1;
         using std::placeholders::_2;
 
         // Advertise services
-        get_feature_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>(
+        get_feature_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>(
             "~/get_feature", std::bind(&ScanControlDriver::ServiceGetFeature, this, _1, _2));
-        set_feature_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>(
+        set_feature_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>(
             "~/set_feature", std::bind(&ScanControlDriver::ServiceSetFeature, this, _1, _2));
-        get_resolution_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>(
+        get_resolution_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>(
             "~/get_resolution", std::bind(&ScanControlDriver::ServiceGetResolution, this, _1, _2));
-        set_resolution_srv = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>(
+        set_resolution_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>(
             "~/set_resolution", std::bind(&ScanControlDriver::ServiceSetResolution, this, _1, _2)); 
-        get_available_resolutions_srv   = private_nh_->create_service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>(
+        get_available_resolutions_srv   = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>(
             "~/get_available_resolutions",  std::bind(&ScanControlDriver::ServiceGetAvailableResolutions, this, _1, _2));
-        invert_z_srv = private_nh_->create_service<std_srvs::srv::SetBool>(
+        invert_z_srv = this->create_service<std_srvs::srv::SetBool>(
             "~/invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
-        invert_x_srv = private_nh_->create_service<std_srvs::srv::SetBool>(
+        invert_x_srv = this->create_service<std_srvs::srv::SetBool>(
             "~/invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
     }
 
@@ -341,7 +339,7 @@ namespace scancontrol_driver
     /* Process and publish profile */
     int ScanControlDriver::ProcessAndPublishProfile(const void * data, size_t data_size){
         // Timestamp 
-        pcl_conversions::toPCL(nh_->get_clock()->now(), point_cloud_msg->header.stamp);
+        pcl_conversions::toPCL(this->get_clock()->now(), point_cloud_msg->header.stamp);
 
         // Copy sensor data to local buffer 
         if (data != NULL && data_size == profile_buffer.size()){

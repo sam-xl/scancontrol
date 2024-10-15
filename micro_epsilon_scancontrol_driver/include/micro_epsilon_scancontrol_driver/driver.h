@@ -31,11 +31,11 @@ typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;
 
 namespace scancontrol_driver
 {
-    class ScanControlDriver
+    class ScanControlDriver: public rclcpp::Node
     {
         public:
             // Constructor and destructor
-            ScanControlDriver(rclcpp::Node::SharedPtr& nh, rclcpp::Node::SharedPtr& private_nh);
+            ScanControlDriver();
             ~ScanControlDriver() {}
             
             // Profile functions
@@ -97,8 +97,6 @@ namespace scancontrol_driver
             bool transfer_active_ = false;
 
             // ROS handles
-            rclcpp::Node::SharedPtr nh_;
-            rclcpp::Node::SharedPtr private_nh_;
             rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr publisher;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetFeature>::SharedPtr get_feature_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetFeature>::SharedPtr set_feature_srv;

@@ -16,8 +16,8 @@
 #include <micro_epsilon_scancontrol_msgs/srv/get_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_resolution.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_available_resolutions.hpp>
-#include <micro_epsilon_scancontrol_msgs/srv/get_time.hpp>
-#include <micro_epsilon_scancontrol_msgs/srv/set_time.hpp>
+#include <micro_epsilon_scancontrol_msgs/srv/get_duration.hpp>
+#include <micro_epsilon_scancontrol_msgs/srv/set_duration.hpp>
 
 #include <llt.h>
 #include <mescan.h>
@@ -33,14 +33,18 @@
 typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;
 
 namespace scancontrol_driver
-{
+{   
+    // aliases
+    using set_duration_srv = micro_epsilon_scancontrol_msgs::srv::SetDuration;
+    using get_duration_srv = micro_epsilon_scancontrol_msgs::srv::GetDuration;
+
     class ScanControlDriver: public rclcpp::Node
     {
         public:
             // Constructor and destructor
-            ScanControlDriver(const std::string& name);
-            ~ScanControlDriver() {}
-            
+            explicit ScanControlDriver(const std::string& name);
+            ~ScanControlDriver() = default;
+
             // Profile functions
             int SetPartialProfile(int &resolution);
             int StartProfileTransfer();
@@ -51,8 +55,8 @@ namespace scancontrol_driver
             int GetFeature(unsigned int setting_id, unsigned int *value);
             int SetFeature(unsigned int setting_id, unsigned int value);
             // specialised features specific to encoding/decoding pattern
-            int SetTime(unsigned int setting_id, unsigned int value);
-            int GetTime(unsigned int setting_id, unsigned int* value);
+            int SetDuration(unsigned int setting_id, unsigned int value);
+            int GetDuration(unsigned int setting_id, unsigned int* value);
 
             // Get configuration parameters 
             std::string serial() const {return config_.serial;};
@@ -80,18 +84,18 @@ namespace scancontrol_driver
             void ServiceInvertX(
                 const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
                 std::shared_ptr<std_srvs::srv::SetBool::Response> response);
-            void ServiceSetExposureTime(
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
-                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response);
-            void ServiceGetExposureTime(
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
-                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response);
-            void ServiceSetIdleTime(
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
-                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response);
-            void ServiceGetIdleTime(
-                const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
-                std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response);
+            void ServiceSetExposureDuration(
+                const std::shared_ptr<set_duration_srv::Request> request,
+                std::shared_ptr<set_duration_srv::Response> response);
+            void ServiceGetExposureDuration(
+                const std::shared_ptr<get_duration_srv::Request> request,
+                std::shared_ptr<get_duration_srv::Response> response);
+            void ServiceSetIdleDuration(
+                const std::shared_ptr<set_duration_srv::Request> request,
+                std::shared_ptr<set_duration_srv::Response> response);
+            void ServiceGetIdleDuration(
+                const std::shared_ptr<get_duration_srv::Request> request,
+                std::shared_ptr<get_duration_srv::Response> response);
             
         private:
             // Profile functions
@@ -121,10 +125,10 @@ namespace scancontrol_driver
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetResolution>::SharedPtr get_resolution_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetResolution>::SharedPtr set_resolution_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>::SharedPtr get_available_resolutions_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetTime>::SharedPtr set_exposure_time_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetTime>::SharedPtr get_exposure_time_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetTime>::SharedPtr set_idle_time_srv;
-            rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetTime>::SharedPtr get_idle_time_srv;
+            rclcpp::Service<set_duration_srv>::SharedPtr set_exposure_duration_srv;
+            rclcpp::Service<get_duration_srv>::SharedPtr get_exposure_duration_srv;
+            rclcpp::Service<set_duration_srv>::SharedPtr set_idle_duration_srv;
+            rclcpp::Service<get_duration_srv>::SharedPtr get_idle_duration_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
 

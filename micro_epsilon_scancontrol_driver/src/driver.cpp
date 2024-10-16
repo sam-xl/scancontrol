@@ -250,14 +250,14 @@ namespace scancontrol_driver
             "~/invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
         invert_x_srv = this->create_service<std_srvs::srv::SetBool>(
             "~/invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
-        set_exposure_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetTime>(
-            "~/set_exposure_time", std::bind(&ScanControlDriver::ServiceSetExposureTime, this, _1, _2));
-        get_exposure_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetTime>(
-            "~/get_exposure_time", std::bind(&ScanControlDriver::ServiceGetExposureTime, this, _1, _2));
-        set_idle_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetTime>(
-            "~/set_idle_time", std::bind(&ScanControlDriver::ServiceSetIdleTime, this, _1, _2));
-        get_idle_time_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetTime>(
-            "~/get_idle_time", std::bind(&ScanControlDriver::ServiceGetIdleTime, this, _1, _2));
+        set_exposure_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetDuration>(
+            "~/set_exposure_duration", std::bind(&ScanControlDriver::ServiceSetExposureDuration, this, _1, _2));
+        get_exposure_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
+            "~/get_exposure_duration", std::bind(&ScanControlDriver::ServiceGetExposureDuration, this, _1, _2));
+        set_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetDuration>(
+            "~/set_idle_duration", std::bind(&ScanControlDriver::ServiceSetIdleDuration, this, _1, _2));
+        get_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
+            "~/get_idle_duration", std::bind(&ScanControlDriver::ServiceGetIdleDuration, this, _1, _2));
 
     }
 
@@ -567,7 +567,7 @@ namespace scancontrol_driver
     // Generic function for setting a times like exposure and idle time.
     // setting_id: 
     // value: time in microseconds. min: 1 mus, max: 40950 mus ;  eg. 1005 = 1.005ms
-    int ScanControlDriver::SetTime(unsigned int setting_id, unsigned int value){
+    int ScanControlDriver::SetDuration(unsigned int setting_id, unsigned int value){
         int ret_code;
 
         // detailed docs about encoding and decoding here: https://samxl.atlassian.net/l/cp/3fr1eQD0
@@ -587,7 +587,7 @@ namespace scancontrol_driver
         
         // Check if returned value from laser matches the request
         unsigned int actual_value = 0;
-        ret_code = GetTime(setting_id, &actual_value);
+        ret_code = GetDuration(setting_id, &actual_value);
         if (actual_value != value){
             RCLCPP_WARN(LOGGER, "Requested value and actual value do not match. ");
             return ret_code;
@@ -595,7 +595,7 @@ namespace scancontrol_driver
         return GENERAL_FUNCTION_OK;
     }
 
-    int ScanControlDriver::GetTime(unsigned int setting_id, unsigned int* value){
+    int ScanControlDriver::GetDuration(unsigned int setting_id, unsigned int* value){
         int ret_code = 0;
         ret_code = GetFeature(setting_id, value);
         
@@ -617,38 +617,38 @@ namespace scancontrol_driver
 
 
     // a wrapper on setfeature to use proper encoding 
-    void ScanControlDriver::ServiceSetExposureTime(
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
-        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response){
+    void ScanControlDriver::ServiceSetExposureDuration(
+        const std::shared_ptr<set_duration_srv::Request> request,
+        std::shared_ptr<set_duration_srv::Response> response){
         
-        int ret_code = SetTime(FEATURE_FUNCTION_EXPOSURE_TIME, request->time);
+        int ret_code = SetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, request->duration);
         response->success = !(ret_code < GENERAL_FUNCTION_OK);
         response->return_code = ret_code;
     }
 
     // a wrapper on getfeature to use proper decoding
-    void ScanControlDriver::ServiceGetExposureTime(
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
-        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response){
-        response->return_code = GetTime(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->time));
+    void ScanControlDriver::ServiceGetExposureDuration(
+        const std::shared_ptr<get_duration_srv::Request> request,
+        std::shared_ptr<get_duration_srv::Response> response){
+        response->return_code = GetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->duration));
         response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }
 
         // a wrapper on setfeature to use proper encoding 
-    void ScanControlDriver::ServiceSetIdleTime(
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Request> request,
-        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetTime::Response> response){
+    void ScanControlDriver::ServiceSetIdleDuration(
+        const std::shared_ptr<set_duration_srv::Request> request,
+        std::shared_ptr<set_duration_srv::Response> response){
         
-        int ret_code = SetTime(FEATURE_FUNCTION_IDLE_TIME, request->time);
+        int ret_code = SetDuration(FEATURE_FUNCTION_IDLE_TIME, request->duration);
         response->success = !(ret_code < GENERAL_FUNCTION_OK);
         response->return_code = ret_code;
     }
 
     // a wrapper on getfeature to use proper decoding
-    void ScanControlDriver::ServiceGetIdleTime(
-        const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Request> request,
-        std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetTime::Response> response){
-        response->return_code = GetTime(FEATURE_FUNCTION_IDLE_TIME, &(response->time));
+    void ScanControlDriver::ServiceGetIdleDuration(
+        const std::shared_ptr<get_duration_srv::Request> request,
+        std::shared_ptr<get_duration_srv::Response> response){
+        response->return_code = GetDuration(FEATURE_FUNCTION_IDLE_TIME, &(response->duration));
         response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }  
 

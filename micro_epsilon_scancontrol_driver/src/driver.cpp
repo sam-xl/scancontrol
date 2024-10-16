@@ -618,8 +618,8 @@ namespace scancontrol_driver
 
     // a wrapper on setfeature to use proper encoding 
     void ScanControlDriver::ServiceSetExposureDuration(
-        const std::shared_ptr<set_duration_srv::Request> request,
-        std::shared_ptr<set_duration_srv::Response> response){
+        const std::shared_ptr<SetDurationRequest> request,
+        std::shared_ptr<SetDurationResponse> response){
         
         int ret_code = SetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, request->duration);
         response->success = !(ret_code < GENERAL_FUNCTION_OK);
@@ -628,16 +628,16 @@ namespace scancontrol_driver
 
     // a wrapper on getfeature to use proper decoding
     void ScanControlDriver::ServiceGetExposureDuration(
-        const std::shared_ptr<get_duration_srv::Request> request,
-        std::shared_ptr<get_duration_srv::Response> response){
+        const std::shared_ptr<GetDurationRequest> request,
+        std::shared_ptr<GetDurationResponse> response){
         response->return_code = GetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->duration));
         response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }
 
         // a wrapper on setfeature to use proper encoding 
     void ScanControlDriver::ServiceSetIdleDuration(
-        const std::shared_ptr<set_duration_srv::Request> request,
-        std::shared_ptr<set_duration_srv::Response> response){
+        const std::shared_ptr<SetDurationRequest> request,
+        std::shared_ptr<SetDurationResponse> response){
         
         int ret_code = SetDuration(FEATURE_FUNCTION_IDLE_TIME, request->duration);
         response->success = !(ret_code < GENERAL_FUNCTION_OK);
@@ -646,8 +646,8 @@ namespace scancontrol_driver
 
     // a wrapper on getfeature to use proper decoding
     void ScanControlDriver::ServiceGetIdleDuration(
-        const std::shared_ptr<get_duration_srv::Request> request,
-        std::shared_ptr<get_duration_srv::Response> response){
+        const std::shared_ptr<GetDurationRequest> request,
+        std::shared_ptr<GetDurationResponse> response){
         response->return_code = GetDuration(FEATURE_FUNCTION_IDLE_TIME, &(response->duration));
         response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }  

@@ -34,12 +34,19 @@ typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;
 
 namespace scancontrol_driver
 {   
-    // aliases
-    using set_duration_srv = micro_epsilon_scancontrol_msgs::srv::SetDuration;
-    using get_duration_srv = micro_epsilon_scancontrol_msgs::srv::GetDuration;
 
     class ScanControlDriver: public rclcpp::Node
     {
+        // aliases
+        using SetDurationSrv = micro_epsilon_scancontrol_msgs::srv::SetDuration;
+        using SetDurationRequest = SetDurationSrv::Request;
+        using SetDurationResponse = SetDurationSrv::Response;
+        
+        using GetDurationSrv = micro_epsilon_scancontrol_msgs::srv::GetDuration;
+        using GetDurationRequest = GetDurationSrv::Request;
+        using GetDurationResponse = GetDurationSrv::Response;
+        
+
         public:
             // Constructor and destructor
             explicit ScanControlDriver(const std::string& name);
@@ -85,17 +92,17 @@ namespace scancontrol_driver
                 const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
                 std::shared_ptr<std_srvs::srv::SetBool::Response> response);
             void ServiceSetExposureDuration(
-                const std::shared_ptr<set_duration_srv::Request> request,
-                std::shared_ptr<set_duration_srv::Response> response);
+                const std::shared_ptr<SetDurationRequest> request,
+                std::shared_ptr<SetDurationResponse> response);
             void ServiceGetExposureDuration(
-                const std::shared_ptr<get_duration_srv::Request> request,
-                std::shared_ptr<get_duration_srv::Response> response);
+                const std::shared_ptr<GetDurationRequest> request,
+                std::shared_ptr<GetDurationResponse> response);
             void ServiceSetIdleDuration(
-                const std::shared_ptr<set_duration_srv::Request> request,
-                std::shared_ptr<set_duration_srv::Response> response);
+                const std::shared_ptr<SetDurationRequest> request,
+                std::shared_ptr<SetDurationResponse> response);
             void ServiceGetIdleDuration(
-                const std::shared_ptr<get_duration_srv::Request> request,
-                std::shared_ptr<get_duration_srv::Response> response);
+                const std::shared_ptr<GetDurationRequest> request,
+                std::shared_ptr<GetDurationResponse> response);
             
         private:
             // Profile functions
@@ -125,10 +132,10 @@ namespace scancontrol_driver
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetResolution>::SharedPtr get_resolution_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetResolution>::SharedPtr set_resolution_srv;
             rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>::SharedPtr get_available_resolutions_srv;
-            rclcpp::Service<set_duration_srv>::SharedPtr set_exposure_duration_srv;
-            rclcpp::Service<get_duration_srv>::SharedPtr get_exposure_duration_srv;
-            rclcpp::Service<set_duration_srv>::SharedPtr set_idle_duration_srv;
-            rclcpp::Service<get_duration_srv>::SharedPtr get_idle_duration_srv;
+            rclcpp::Service<SetDurationSrv>::SharedPtr set_exposure_duration_srv;
+            rclcpp::Service<GetDurationSrv>::SharedPtr get_exposure_duration_srv;
+            rclcpp::Service<SetDurationSrv>::SharedPtr set_idle_duration_srv;
+            rclcpp::Service<GetDurationSrv>::SharedPtr get_idle_duration_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
 

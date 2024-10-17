@@ -3,9 +3,9 @@
 namespace scancontrol_driver
 {
 
-    static const rclcpp::Logger LOGGER = rclcpp::get_logger("scancontrol_driver");
+    static const rclcpp::Logger LOGGER = rclcpp::get_logger("scancontrol_driver_node");  // TODO change this into a class variable. or just use this->get_logger()?
 
-    ScanControlDriver::ScanControlDriver():Node("scancontrol_driver")
+    ScanControlDriver::ScanControlDriver(const std::string& name):Node(name)
     {   
         /* 
             Extract the relevant parameters. 
@@ -250,6 +250,15 @@ namespace scancontrol_driver
             "~/invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
         invert_x_srv = this->create_service<std_srvs::srv::SetBool>(
             "~/invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
+        set_exposure_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetDuration>(
+            "~/set_exposure_duration", std::bind(&ScanControlDriver::ServiceSetExposureDuration, this, _1, _2));
+        get_exposure_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
+            "~/get_exposure_duration", std::bind(&ScanControlDriver::ServiceGetExposureDuration, this, _1, _2));
+        set_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetDuration>(
+            "~/set_idle_duration", std::bind(&ScanControlDriver::ServiceSetIdleDuration, this, _1, _2));
+        get_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
+            "~/get_idle_duration", std::bind(&ScanControlDriver::ServiceGetIdleDuration, this, _1, _2));
+
     }
 
     int ScanControlDriver::SetPartialProfile(int &resolution){
@@ -360,7 +369,8 @@ namespace scancontrol_driver
     /* Retrieve the current value of a setting/feature. Consult the scanCONTROL API documentation for a list of available features */ 
     int ScanControlDriver::GetFeature(unsigned int setting_id, unsigned int *value){
         int return_code = 0;
-        if (return_code = device_interface_ptr->GetFeature(setting_id, value) < GENERAL_FUNCTION_OK){
+        return_code = device_interface_ptr->GetFeature(setting_id, value);
+        if (return_code < GENERAL_FUNCTION_OK){
             RCLCPP_WARN_STREAM(LOGGER, "Setting could not be retrieved. Code: " << return_code);
             return return_code;
         }
@@ -441,7 +451,7 @@ namespace scancontrol_driver
             return;
         }
 
-        // // Change of resolution was succesull
+        // Change of resolution was successful
         config_.resolution = request->resolution;
         // return true;
     }
@@ -552,6 +562,94 @@ namespace scancontrol_driver
         response->success = true;
 
         // return true;
+    }  
+
+    // Generic function for setting a times like exposure and idle time.
+    // setting_id: 
+    // value: time in microseconds. min: 1 mus, max: 40950 mus ;  eg. 1005 = 1.005ms
+    int ScanControlDriver::SetDuration(unsigned int setting_id, unsigned int value){
+        int ret_code;
+
+        // detailed docs about encoding and decoding here: https://samxl.atlassian.net/l/cp/3fr1eQD0
+
+        // encoded value in 1 mus steps. 
+        uint32_t remainder = ((value % 10) << 12) & 0xF000; // Remainder is left shifted first and bits 0-12 are masked. the quotient will occupy this area.
+        uint32_t quotient = ((value / 10)) & 0xFFF; // take the quotient and mask bits 12-15
+        uint32_t encoded_value = remainder + quotient; 
+
+        ret_code = SetFeature(setting_id, encoded_value); 
+        
+        // success if value was sent AND set.
+        if (ret_code < GENERAL_FUNCTION_OK){
+            RCLCPP_ERROR_STREAM(LOGGER, "SetFeature failed. Return code:"<<ret_code);
+            return ret_code;
+        }
+        
+        // Check if returned value from laser matches the request
+        unsigned int actual_value = 0;
+        ret_code = GetDuration(setting_id, &actual_value);
+        if (actual_value != value){
+            RCLCPP_WARN(LOGGER, "Requested value and actual value do not match. ");
+            return ret_code;
+        }
+        return GENERAL_FUNCTION_OK;
+    }
+
+    int ScanControlDriver::GetDuration(unsigned int setting_id, unsigned int* value){
+        int ret_code = 0;
+        ret_code = GetFeature(setting_id, value);
+        
+        if (ret_code < GENERAL_FUNCTION_OK){
+            RCLCPP_ERROR_STREAM(LOGGER, "GetFeature failed. Return code: "<<ret_code);
+            return ret_code;
+        }
+
+        // Decode
+        // detailed docs about encoding and decoding here: https://samxl.atlassian.net/l/cp/3fr1eQD0
+
+        uint32_t quotient = *value & 0xFFF;               // Extract ExposureTime / 10
+        uint32_t remainder = (*value >> 12) & 0xF;        // Extract ExposureTime % 10
+        *value = (quotient * 10) + remainder;  // Reconstruct ExposureTime
+
+        return GENERAL_FUNCTION_OK;
+
+    }
+
+
+    // a wrapper on setfeature to use proper encoding 
+    void ScanControlDriver::ServiceSetExposureDuration(
+        const std::shared_ptr<SetDurationRequest> request,
+        std::shared_ptr<SetDurationResponse> response){
+        
+        int ret_code = SetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, request->duration);
+        response->success = !(ret_code < GENERAL_FUNCTION_OK);
+        response->return_code = ret_code;
+    }
+
+    // a wrapper on getfeature to use proper decoding
+    void ScanControlDriver::ServiceGetExposureDuration(
+        const std::shared_ptr<GetDurationRequest> request,
+        std::shared_ptr<GetDurationResponse> response){
+        response->return_code = GetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->duration));
+        response->success = !(response->return_code < GENERAL_FUNCTION_OK);
+    }
+
+        // a wrapper on setfeature to use proper encoding 
+    void ScanControlDriver::ServiceSetIdleDuration(
+        const std::shared_ptr<SetDurationRequest> request,
+        std::shared_ptr<SetDurationResponse> response){
+        
+        int ret_code = SetDuration(FEATURE_FUNCTION_IDLE_TIME, request->duration);
+        response->success = !(ret_code < GENERAL_FUNCTION_OK);
+        response->return_code = ret_code;
+    }
+
+    // a wrapper on getfeature to use proper decoding
+    void ScanControlDriver::ServiceGetIdleDuration(
+        const std::shared_ptr<GetDurationRequest> request,
+        std::shared_ptr<GetDurationResponse> response){
+        response->return_code = GetDuration(FEATURE_FUNCTION_IDLE_TIME, &(response->duration));
+        response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }  
 
     /* Callback for when a new profile is read, for use with the scanCONTROL API. */

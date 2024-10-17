@@ -1,0 +1,4 @@
+uint32 duration         # time to set in microseconds. Range: 0 - 40959
+---
+int32 return_code   # 1 if success, otherwise errorcode from scancontrol SDK
+int32 success       # True if the value was sent successfull , and matches the GetTime value 

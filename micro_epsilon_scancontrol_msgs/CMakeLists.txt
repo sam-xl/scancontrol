@@ -16,6 +16,8 @@ set(srv_files
   "srv/GetResolution.srv"
   "srv/SetFeature.srv"
   "srv/SetResolution.srv"
+  "srv/GetDuration.srv"
+  "srv/SetDuration.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

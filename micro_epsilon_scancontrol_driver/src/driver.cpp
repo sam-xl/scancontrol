@@ -26,12 +26,12 @@ namespace scancontrol_driver
         // TODO: Are these parameters needed?
         this->declare_parameter<int>("partial_profile_start_point", 0);
         this->get_parameter_or("partial_profile_start_point", config_.pp_start_point, 0);
-        this->declare_parameter<int>("partial_profile_start_point_data", 4);
-        this->get_parameter_or("partial_profile_start_point_data", config_.pp_start_point_data, 4);
+        this->declare_parameter<int>("partial_profile_start_point_data", 0);
+        this->get_parameter_or("partial_profile_start_point_data", config_.pp_start_point_data, 0);
         this->declare_parameter<int>("partial_profile_point_count", -1);
         this->get_parameter_or("partial_profile_point_count", config_.pp_point_count, -1);
-        this->declare_parameter<int>("partial_profile_data_width", 4);
-        this->get_parameter_or("partial_profile_data_width", config_.pp_point_data_width, 4);
+        this->declare_parameter<int>("partial_profile_data_width", 8);
+        this->get_parameter_or("partial_profile_data_width", config_.pp_point_data_width, 8);
 
         // Create driver interface object:
         device_interface_ptr = std::make_unique<CInterfaceLLT>();
@@ -290,6 +290,9 @@ namespace scancontrol_driver
         lost_values = (16 + t_partial_profile_.nPointDataWidth - 1)/t_partial_profile_.nPointDataWidth;
         value_x.resize(t_partial_profile_.nPointCount);
         value_z.resize(t_partial_profile_.nPointCount);
+        maximum_intensity.resize(t_partial_profile_.nPointCount);
+        threshold.resize(t_partial_profile_.nPointCount);
+
         RCLCPP_INFO_STREAM(LOGGER, "Profile is losing " << std::to_string(lost_values) << " values due to timestamp of 16 byte at the end of the profile.");
 
         // Prepare new point cloud message
@@ -330,7 +333,7 @@ namespace scancontrol_driver
     /* Process raw profile data and create the point cloud message */
     int ScanControlDriver::Profile2PointCloud(){
 
-        device_interface_ptr->ConvertPartProfile2Values(&profile_buffer[0], profile_buffer.size(), &t_partial_profile_, device_type, 0, NULL, NULL, NULL, &value_x[0], &value_z[0], NULL, NULL);
+        int ret_code = device_interface_ptr->ConvertPartProfile2Values(&profile_buffer[0], profile_buffer.size(), &t_partial_profile_, device_type, 0, NULL, &maximum_intensity[0], &threshold[0], &value_x[0], &value_z[0], NULL, NULL);
         for (int i = 0; i < config_.resolution; i++){
             point_cloud_msg->points[i].x = value_x[i]/1000;
             
@@ -340,6 +343,7 @@ namespace scancontrol_driver
             }
             else{
                 point_cloud_msg->points[i].z = value_z[i]/1000;
+                point_cloud_msg->points[i].intensity = maximum_intensity[i];
             }
         }
         return GENERAL_FUNCTION_OK;

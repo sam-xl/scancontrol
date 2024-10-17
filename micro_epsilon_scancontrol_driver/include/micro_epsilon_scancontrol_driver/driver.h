@@ -27,7 +27,7 @@
 #define MAX_RESOLUTION_COUNT 6
 #define GENERAL_FUNCTION_FAILED -1
 
-#define DEFAULT_FRAME_ID "scancontrol"
+#define DEFAULT_FRAME_ID "laser_frame"
 #define DEFAULT_TOPIC_NAME "scancontrol_pointcloud"
 
 typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;
@@ -149,6 +149,7 @@ namespace scancontrol_driver
             std::vector<double> value_x, value_z;
             int lost_values;
             unsigned int lost_profiles;
+            std::vector<unsigned short> maximum_intensity, threshold;
 
             point_cloud_t::Ptr point_cloud_msg;
 

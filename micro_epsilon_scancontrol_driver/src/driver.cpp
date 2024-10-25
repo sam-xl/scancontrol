@@ -595,14 +595,17 @@ namespace scancontrol_driver
     {
         RCLCPP_INFO(LOGGER, "Received 'laseron' Message");
         SetFeature(FEATURE_FUNCTION_LASERPOWER, 2);
-        RCLCPP_INFO(LOGGER, "Laser turned ON");
+        StartProfileTransfer();
+        RCLCPP_INFO(LOGGER, "Laser and profile transfer turned ON");
+
     }
 
     void ScanControlDriver::laser_off_callback(const std_msgs::msg::Empty::SharedPtr msg)
     {
         RCLCPP_INFO(LOGGER, "Received 'laseroff' Message");
         SetFeature(FEATURE_FUNCTION_LASERPOWER, 0);
-        RCLCPP_INFO(LOGGER, "Laser turned OFF");
+        StopProfileTransfer();
+        RCLCPP_INFO(LOGGER, "Laser and profile transfer turned OFF");
     }
 
 } // namespace scancontrol_driver

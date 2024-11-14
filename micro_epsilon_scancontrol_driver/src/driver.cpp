@@ -108,7 +108,7 @@ namespace scancontrol_driver
                 RCLCPP_INFO_STREAM(LOGGER, "No 'serial' set, selecting first interface: " << available_interfaces[selected_interface]);
             }
         }
-
+        selected_interface = 0;
         /*
             Set the selected device to the driver interface class and catch possible errors
         */
@@ -258,6 +258,8 @@ namespace scancontrol_driver
             "~/set_idle_duration", std::bind(&ScanControlDriver::ServiceSetIdleDuration, this, _1, _2));
         get_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
             "~/get_idle_duration", std::bind(&ScanControlDriver::ServiceGetIdleDuration, this, _1, _2));
+        toggle_laser_srv = this->create_service<std_srvs::srv::SetBool>(
+            "~/toggle_laser", std::bind(&ScanControlDriver::ServiceToggleLaserPower, this, _1, _2));
 
     }
 
@@ -655,6 +657,34 @@ namespace scancontrol_driver
         response->return_code = GetDuration(FEATURE_FUNCTION_IDLE_TIME, &(response->duration));
         response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }  
+
+    void ScanControlDriver::ServiceToggleLaserPower(
+                const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                std::shared_ptr<std_srvs::srv::SetBool::Response> response){
+        
+        int ret_code;
+        if (request->data){ //Turn On Laser
+            
+            this->SetFeature(FEATURE_FUNCTION_LASERPOWER,2);
+
+            // Loop driver until shutdown
+            ret_code = this->StartProfileTransfer();            
+        }
+        else{ //Turn Off Laser
+            this->SetFeature(FEATURE_FUNCTION_LASERPOWER,0);
+
+            // Loop driver until shutdown
+            ret_code = this->StopProfileTransfer();
+        }
+
+        if (ret_code < GENERAL_FUNCTION_OK){
+            response->success=false;
+            return;
+        }
+
+        response->success=true;
+    }
+            
 
     /* Callback for when a new profile is read, for use with the scanCONTROL API. */
     void NewProfileCallback(const void * data, size_t data_size, gpointer user_data){

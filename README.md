@@ -17,43 +17,29 @@ Maintainers:
 ## Installation
 
 #### Dependencies
+It is assumed the following dependencies are installed on your systems already.
 - [Aravis 0.8.x](https://github.com/AravisProject/aravis/releases) [[docs]](https://aravisproject.github.io/aravis/)
 - [scanCONTROL Linux C++ SDK 1.0.x](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
 
+Alternatively, a `Dockerfile` is provided to build a ROS image with the dependencies installed.
+
 #### Building
-To build from source, clone the latest version from this repository into your workspace and compile the package:
+To build from source, clone the latest version from this repository into your workspace:
 
 ```bash
-mkdir -p ros2_ws/src && cd ros2_ws
-git clone git@github.com:sam-xl/scancontrol.git -b ros2-devel src
+cd ros_ws
+git clone https://github.com/sam-xl/scancontrol.git
 ```
-To build locally, after installing Aravis and the SDK:
+
+Install the dependencies of the cloned packages using `rosdep`:
 ```bash
-sudo apt-get update
-rosdep update 
 rosdep install --from-paths src --ignore-src -y
-colcon build --merge-install --symlink-install --cmake-args "-DCMAKE_BUILD_TYPE=RelWithDebInfo" "-DCMAKE_EXPORT_COMPILE_COMMANDS=On" -Wall -Wextra -Wpedantic
 ```
-And source the installation
-```bash
-. install/setup.bash
-```
-## Development setup
-For anyone having access to scanCONTROL hardware and not wanting to install dependencies locally, follow the setup below to work with docker compose or in a devcontainer environment.
 
-#### Docker compose:
-- `cd src/scancontrol/.docker`
-- `docker compose up -d --build`
-- If using VSCode, you can attach a shell or VSCode and work from there.
-- Or you can use other dev IDEs? **TODO**: 
-  - Add [watch](https://docs.docker.com/compose/file-watch/) sections to one or more services in compose.yaml
-  - Run docker compose watch to build and launch a Compose project and start the file watch mode.
-  - Edit service source files using your preferred IDE or editor
-#### devcontainer:
-- Link the `.devcontainer` folder
-  - cd to your `ros2_ws` 
-  - `cp src/scancontrol/.devcontainer/ .`
-  - Hit `F1` in VSCode and select `build and reaopen in container`
+Finally, build all packages in the workspace:
+```bash
+colcon build
+```
 
 ## Nodes
 ### scancontrol_description_node

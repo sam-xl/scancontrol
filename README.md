@@ -149,7 +149,7 @@ Extends: `[ros-humble-ros-core]`
 
 ```bash
 cd .docker
-docker build . --target scancontrol-core -t scancontrol:humble-ros-core
+docker build . --target scancontrol-core -t samxl/scancontrol:humble-ros-core
 ```
 
 ### scancontrol-base
@@ -160,7 +160,7 @@ Extends: `[scancontrol-core]`
 
 ```bash
 cd .docker
-docker build . --target scancontrol-base -t scancontrol:humble-ros-base
+docker build . --target scancontrol-base -t samxl/scancontrol:humble-ros-base
 ```
 
 ## Bugs & Feature Requests

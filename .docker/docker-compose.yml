@@ -6,7 +6,7 @@ services:
     container_name: scancontrol-container
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     user: ros
     working_dir: /home/ros/workspace
     # command: >

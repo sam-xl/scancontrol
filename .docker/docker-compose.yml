@@ -1,18 +1,9 @@
 name: scancontrol
 
 services:
-  # Root dependencies needed to build ros packages
-  scancontrol-base:
-    build: 
-      context: ${SCANCONTROL_SRC_DIR}
-      dockerfile: .docker/Dockerfile
-    image: "scancontrol:base"
-
   # Builds the ROS package
   scancontrol-build:
-    depends_on: 
-      scancontrol-base:
-        condition: service_completed_successfully  # start the ROS build only when base is done
+    container_name: scancontrol-build
     build:
       context: ${SCANCONTROL_SRC_DIR}
       dockerfile: .docker/build.Dockerfile
@@ -21,7 +12,7 @@ services:
     image: "scancontrol:build"
     working_dir: ${SCANCONTROL_TARGET_WS}
     user: ${PUID}:${PGID}
-    # command: tail -f /dev/null 
+    command: tail -f /dev/null 
     
   # Runs the Scancontrol driver node as continuous service
   scancontrol-service:

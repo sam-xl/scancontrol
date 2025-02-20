@@ -11,8 +11,7 @@ services:
         - TARGET_WS=${SCANCONTROL_TARGET_WS}
     image: "scancontrol:build"
     working_dir: ${SCANCONTROL_TARGET_WS}
-    user: ${PUID}:${PGID}
-    command: tail -f /dev/null 
+    # command: tail -f /dev/null 
     
   # Runs the Scancontrol driver node as continuous service
   scancontrol-service:
@@ -20,7 +19,6 @@ services:
     container_name: scancontrol-service
     working_dir: ${SCANCONTROL_TARGET_WS}
     network_mode: host 
-    user: ${PUID}:${PGID}
     depends_on:
       scancontrol-build:
           condition: service_completed_successfully

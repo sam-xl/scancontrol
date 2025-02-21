@@ -9,6 +9,7 @@ services:
       dockerfile: .docker/build.Dockerfile
       args:
         - TARGET_WS=${SCANCONTROL_TARGET_WS}
+    network_mode: host 
     image: "scancontrol:build"
     working_dir: ${SCANCONTROL_TARGET_WS}
     # command: tail -f /dev/null 

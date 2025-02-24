@@ -19,7 +19,12 @@ services:
     image: "scancontrol:build"
     container_name: scancontrol-service
     working_dir: ${SCANCONTROL_TARGET_WS}
+    ipc: host
     network_mode: host 
+    environment:
+      - ROS_DOMAIN_ID=31
+      - ROS_LOCALHOST_ONLY=0
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
     depends_on:
       scancontrol-build:
           condition: service_completed_successfully

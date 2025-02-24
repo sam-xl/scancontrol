@@ -1,32 +1,12 @@
-name: scancontrol
-
 services:
-  # Builds the ROS package
-  scancontrol-build:
-    container_name: scancontrol-build
-    build:
-      context: ${SCANCONTROL_SRC_DIR}
-      dockerfile: .docker/build.Dockerfile
-      args:
-        - TARGET_WS=${SCANCONTROL_TARGET_WS}
-    network_mode: host 
-    image: "scancontrol:build"
-    working_dir: ${SCANCONTROL_TARGET_WS}
-    # command: tail -f /dev/null 
-    
-  # Runs the Scancontrol driver node as continuous service
   scancontrol-service:
-    image: "scancontrol:build"
+    image: "scancontrol:build"  # eventually this will be a registry image. for now, local
     container_name: scancontrol-service
     working_dir: ${SCANCONTROL_TARGET_WS}
     ipc: host
     network_mode: host 
     environment:
-      - ROS_DOMAIN_ID=31
-      - ROS_LOCALHOST_ONLY=0
-      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
-    depends_on:
-      scancontrol-build:
-          condition: service_completed_successfully
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}
+      - RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION} 
     command: /bin/bash -c 'source install/setup.bash && ros2 run micro_epsilon_scancontrol_driver driver_node'
-    # command: tail -f /dev/null  

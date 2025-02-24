@@ -16,7 +16,7 @@ RUN sudo apt-get update \
     python3-vcstool     \
   && sudo rm -rf /var/lib/apt/lists/* \
   && sudo apt-get autoremove -y \
-  && sudo apt-get clean -y \
+  && sudo apt-get clean -y
 
 WORKDIR $TARGET_WS 
 

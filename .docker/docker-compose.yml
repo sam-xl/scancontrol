@@ -1,6 +1,6 @@
 services:
   scancontrol-service:
-    image: "scancontrol:build"  # eventually this will be a registry image. for now, local
+    image: "scancontrol:latest"  # eventually this will be a registry image. for now, locally built by docker-compose.dev.yml
     container_name: scancontrol-service
     working_dir: ${SCANCONTROL_TARGET_WS}
     ipc: host

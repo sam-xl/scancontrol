@@ -103,6 +103,9 @@ namespace scancontrol_driver
             void ServiceGetIdleDuration(
                 const std::shared_ptr<GetDurationRequest> request,
                 std::shared_ptr<GetDurationResponse> response);
+            void ServiceToggleLaserPower(
+                const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                std::shared_ptr<std_srvs::srv::SetBool::Response> response);
             
         private:
             // Profile functions
@@ -138,6 +141,7 @@ namespace scancontrol_driver
             rclcpp::Service<GetDurationSrv>::SharedPtr get_idle_duration_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
             rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
+            rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr toggle_laser_srv;
 
 
 

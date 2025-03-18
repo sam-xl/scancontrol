@@ -658,6 +658,9 @@ namespace scancontrol_driver
         response->success = !(response->return_code < GENERAL_FUNCTION_OK);
     }  
 
+    /*
+    Service call that can switch the laser on and off
+    */
     void ScanControlDriver::ServiceToggleLaserPower(
                 const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
                 std::shared_ptr<std_srvs::srv::SetBool::Response> response){

@@ -1,6 +1,6 @@
 ARG ROS_DISTRO=humble
 
-FROM registry.tudelft.nl/samxl/scancontrol:${ROS_DISTRO}-base AS dev 
+FROM registry.tudelft.nl/samxl/scancontrol:${ROS_DISTRO}-base AS scancontrol-service 
 
 ARG TARGET_WS
 ARG ROS_DISTRO

@@ -1,3 +1,5 @@
+ARG ROS_DISTRO=${ROS_DISTRO}
+
 ARG SCANCONTROL_SDK_VERSION=1.0.0
 
 ################################################################################
@@ -74,7 +76,7 @@ RUN mkdir /library_pkgs && \
 # ros-core and Aravis + scanCONTROL SDK
 #   for use with CI
 ################################################################################
-FROM ros:humble-ros-core AS scancontrol-core
+FROM ros:${ROS_DISTRO}-ros-core AS scancontrol-core
 ARG SCANCONTROL_SDK_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
@@ -100,7 +102,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Install the base release + rviz2
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ros-humble-ros-base \
-      ros-humble-rviz2 \
-      ros-humble-rviz-default-plugins \
+      ros-${ROS_DISTRO}-ros-base \
+      ros-${ROS_DISTRO}-rviz2 \
+      ros-${ROS_DISTRO}-rviz-default-plugins \
     && rm -rf /var/lib/apt/lists/*

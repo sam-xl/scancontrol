@@ -1,5 +1,9 @@
-FROM registry.tudelft.nl/samxl/scancontrol:humble-base AS dev 
+ARG ROS_DISTRO=humble
+
+FROM registry.tudelft.nl/samxl/scancontrol:${ROS_DISTRO}-base AS dev 
+
 ARG TARGET_WS
+ARG ROS_DISTRO
 
 SHELL ["/bin/bash", "-c"]
 
@@ -34,4 +38,4 @@ RUN rosdep install --from-paths src --ignore-src -r -y \
     && sudo rm -rf /var/lib/apt/lists/*
 
 # # build package
-RUN source /opt/ros/humble/setup.bash && colcon build
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash && colcon build

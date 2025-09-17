@@ -22,12 +22,12 @@ RUN sudo apt-get update \
   && sudo apt-get autoremove -y \
   && sudo apt-get clean -y
 
-WORKDIR $TARGET_WS 
 
 # perform a copy here so previous layers still remain in cache
-COPY . $TARGET_WS/src/scancontrol
+COPY . /workspaces/scancontrol_ws/src/scancontrol
 
-RUN sudo chown -R ${USERNAME}:${USERNAME} $TARGET_WS
+# ros is the default user in the upstream image
+RUN sudo chown -R ros:ros /workspaces/scancontrol_ws
 
 # install rosdeps
 RUN sudo -E rosdep init \

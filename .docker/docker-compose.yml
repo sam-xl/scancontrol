@@ -2,8 +2,14 @@ name: scancontrol
 
 services:
   scancontrol-service:
-    image: "scancontrol:latest" # eventually this will be a registry image. for now, locally built by docker-compose.dev.yml
-    container_name: scancontrol-service
+    image: samxl/scancontrol:humble-service
+    container_name: scancontrol-humble-service
+    pull_policy: if_not_present
+    build:
+      context: ..
+      dockerfile: .docker/service.Dockerfile
+      args:
+        - ROS_DISTRO=humble
     environment:
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
       - ROS_LOCALHOST_ONLY=${ROS_LOCALHOST_ONLY}

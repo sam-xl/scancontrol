@@ -2,12 +2,17 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.217.4/containers/go
 {
     "name": "scancontrol-devcontainer",
-    "dockerComposeFile": [
-        "../../src/scancontrol/.docker/docker-compose.yml"
-    ],
-    "service": "scancontrol-service",
-	"remoteUser": "ros",
-    "workspaceFolder": "/home/ros/workspace/",
+    "build": {
+		"dockerfile": "../../.docker/Dockerfile",
+		"context": "..",
+		"args": { 
+			// Options for ROS_DISTRO are: humble, iron
+			"ROS_DISTRO": "humble",
+			"USER": "${localEnv:USER}"
+		}
+	},
+    "workspaceMount": "source=${localWorkspaceFolder}/../../,target=/workspace,type=bind",
+  	"workspaceFolder": "/workspace/src",
 	"customizations": {
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.

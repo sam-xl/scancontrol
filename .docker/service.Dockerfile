@@ -3,6 +3,8 @@ ARG ROS_DISTRO=humble
 FROM samxl/scancontrol:${ROS_DISTRO}-base AS scancontrol-service 
 
 ARG ROS_DISTRO
+ARG WORKSPACE_DIR=/tmpfs/scancontrol_ws
+ARG INSTALL_DIR=/opt/scancontrol_ws
 
 SHELL ["/bin/bash", "-c"]
 
@@ -17,23 +19,18 @@ RUN apt-get update \
     python3-colcon-mixin \
     python3-rosdep \
     python3-vcstool     \
-  && rm -rf /var/lib/apt/lists/* \
+  && rosdep init \
+  # && rm -rf /var/lib/apt/lists/* \
   && apt-get autoremove -y \
   && apt-get clean -y
 
 
-# perform a copy here so previous layers still remain in cache
-COPY . /workspaces/scancontrol_ws/src/scancontrol
+RUN --mount=type=tmpfs,target=${WORKSPACE_DIR} --mount=type=bind,target=${WORKSPACE_DIR}/src/scancontrol \
+  cd ${WORKSPACE_DIR} \
+  && source /opt/ros/${ROS_DISTRO}/setup.bash \
+  && rosdep update --include-eol-distros \
+  && rosdep install --from-paths ${WORKSPACE_DIR}/src -iy \
+  && colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release \
+  && cp -r ${WORKSPACE_DIR}/install ${INSTALL_DIR}
 
-WORKDIR /workspaces/scancontrol_ws/
-
-# install rosdeps
-RUN rosdep init \
-  && rosdep update \
-  && apt-get update
-
-RUN rosdep install --from-paths src --ignore-src -r -y \
-    && rm -rf /var/lib/apt/lists/*
-
-# # build package
-RUN source /opt/ros/${ROS_DISTRO}/setup.bash && colcon build
+WORKDIR ${INSTALL_DIR}

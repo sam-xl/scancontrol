@@ -15,7 +15,7 @@ int main(int argc, char** argv)
         RCLCPP_INFO(logger, "Driver started");
 
         //Turn On Laser
-        driver->SetFeature(FEATURE_FUNCTION_LASERPOWER,2);
+        // driver->SetFeature(FEATURE_FUNCTION_LASERPOWER,2);
 
         // Loop driver until shutdown
         driver->StartProfileTransfer();

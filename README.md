@@ -137,6 +137,31 @@ The following parameters are available to allow using multiple scanCONTROL devic
 
 Encapsulates the same driver class as the scancontrol_driver_node, but instead allows for zero-copy data transfer. The Topics, services and paremeters are the same as described for the scancontrol_driver_node above. 
 
+## Docker Images
+
+This repository provides a `Dockerfile` (in the `.docker` folder) with multiple stages for images with Aravis and the scanCONTROL SDK installed.
+
+### scancontrol-core
+Extends: `[ros-humble-ros-core]`
+
+- Installed Aravis.
+- Installed scanCONTROL SDK.
+
+```bash
+cd .docker
+docker build . --target scancontrol-core -t samxl/scancontrol:humble-ros-core
+```
+
+### scancontrol-base
+Extends: `[scancontrol-core]`
+
+- Installed `ros-humble-ros-base`
+- Installed `rviz2`. 
+
+```bash
+cd .docker
+docker build . --target scancontrol-base -t samxl/scancontrol:humble-ros-base
+```
 
 ## Bugs & Feature Requests
 

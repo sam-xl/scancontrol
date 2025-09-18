@@ -1,5 +1,10 @@
+ARG ROS_DISTRO=humble
+
 ARG SCANCONTROL_SDK_VERSION=1.0.0
 
+################################################################################
+# Build .deb packages for Aravis and scanCONTROL SDK
+################################################################################
 FROM ubuntu:22.04 AS build
 
 ARG SCANCONTROL_SDK_VERSION
@@ -67,12 +72,16 @@ RUN mkdir /library_pkgs && \
     mv "/scanCONTROL-Linux-SDK/libmescan/builddir/mescan_${SCANCONTROL_SDK_VERSION}-1_amd64.deb" /library_pkgs && \
     mv "/scanCONTROL-Linux-SDK/libllt/builddir/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb" /library_pkgs
 
-FROM ros:humble-ros-core
+################################################################################
+# ros-core and Aravis + scanCONTROL SDK
+#   for use with CI
+################################################################################
+FROM ros:${ROS_DISTRO}-ros-core AS scancontrol-core
 ARG SCANCONTROL_SDK_VERSION
 
 RUN apt-get update && apt-get install -y --no-install-recommends\
-    build-essential \
-    pkg-config \
+      build-essential \
+      pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build ["/library_pkgs", "/library_pkgs"]
@@ -83,3 +92,17 @@ RUN apt-get update && \
     apt install /library_pkgs/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb \
     && rm -rf /var/lib/apt/lists/*
 
+################################################################################
+# ros-base + Aravis + scanCONTROL SDK + RViz2
+#   for use as a base image in development or deployment
+################################################################################
+FROM scancontrol-core AS scancontrol-base
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install the base release + rviz2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      ros-${ROS_DISTRO}-ros-base \
+      ros-${ROS_DISTRO}-rviz2 \
+      ros-${ROS_DISTRO}-rviz-default-plugins \
+    && rm -rf /var/lib/apt/lists/*

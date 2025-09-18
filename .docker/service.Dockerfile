@@ -20,11 +20,10 @@ RUN apt-get update \
     python3-rosdep \
     python3-vcstool     \
   && rosdep init \
-  # && rm -rf /var/lib/apt/lists/* \
   && apt-get autoremove -y \
   && apt-get clean -y
 
-
+# Mount temporarily and build package
 RUN --mount=type=tmpfs,target=${WORKSPACE_DIR} --mount=type=bind,target=${WORKSPACE_DIR}/src/scancontrol \
   cd ${WORKSPACE_DIR} \
   && source /opt/ros/${ROS_DISTRO}/setup.bash \

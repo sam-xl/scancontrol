@@ -1,27 +1,50 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(micro_epsilon_scancontrol_driver)
 
-find_package(catkin REQUIRED COMPONENTS roscpp pcl_ros micro_epsilon_scancontrol_msgs)
-find_package(PkgConfig REQUIRED)
+# Default to C++17
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 17)
+endif()
 
-pkg_check_modules(scancontrol REQUIRED
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_srvs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(pcl_conversions REQUIRED)
+find_package(pcl_ros REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(PkgConfig REQUIRED)
+find_package(micro_epsilon_scancontrol_msgs REQUIRED)
+
+pkg_check_modules(SCANCONTROL REQUIRED
   aravis-0.8
   glib-2.0
   llt
   mescan
 )
 
-catkin_package(
-  INCLUDE_DIRS include
-  CATKIN_DEPENDS 
-    micro_epsilon_scancontrol_msgs
-    pcl_ros 
-    roscpp 
-  DEPENDS 
-    scancontrol
-)
-
-include_directories(include ${catkin_INCLUDE_DIRS} ${scancontrol_INCLUDE_DIRS})
+include_directories(include ${SCANCONTROL_INCLUDE_DIRS}) 
 
 add_executable(driver_node src/node.cpp src/driver.cpp)
-target_link_libraries(driver_node ${catkin_LIBRARIES} ${scancontrol_LIBRARIES})
+ament_target_dependencies(driver_node 
+  rclcpp
+  std_srvs
+  sensor_msgs
+  pcl_ros
+  pcl_conversions
+  rclcpp_components
+  micro_epsilon_scancontrol_msgs
+)
+target_link_libraries(driver_node
+ "${SCANCONTROL_LIBRARIES}")
+
+install(TARGETS driver_node
+  DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY include/
+  DESTINATION include)
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
+ament_package()

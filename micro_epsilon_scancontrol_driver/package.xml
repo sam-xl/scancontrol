@@ -3,10 +3,12 @@
   <name>micro_epsilon_scancontrol_driver</name>
   <version>0.1.0</version>
   <description>Micro Espsilon scanCONTROL driver</description>
-  <maintainer email="r.tonnear@tudelft.nl">Rik Tonnear</maintainer>
   <maintainer email="d.kroezen@tudelft.nl">Dave Kroezen</maintainer>
 
   <url type="repository">https://github.com/sam-xl/scancontrol</url>
+  <author>Rik Tonnaer</author>
+  <author>Dave Kroezen</author>
+  <author>Nik Sethi</author>
 
   <license>Apache 2.0</license>
 

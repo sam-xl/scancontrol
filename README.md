@@ -146,12 +146,6 @@ The following parameters are available to allow using multiple scanCONTROL devic
 	Define a custom name for the measurement frame in which the point clouds are published.
 
 
-
-### scancontrol_driver_nodelet
-
-Encapsulates the same driver class as the scancontrol_driver_node, but instead allows for zero-copy data transfer. The Topics, services and paremeters are the same as described for the scancontrol_driver_node above. 
-
-
 ## Bugs & Feature Requests
 
 Please report bugs and request features using the [Issue Tracker](https://github.com/sam-xl/scancontrol/issues).

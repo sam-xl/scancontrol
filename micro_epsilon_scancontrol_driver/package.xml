@@ -14,11 +14,9 @@
   
   <depend>roscpp</depend>
   <depend>pcl_ros</depend>
-  <depend>nodelet</depend>
 
   <depend>micro_epsilon_scancontrol_msgs</depend>
 
   <export>
-    <nodelet plugin="${prefix}/me_scancontrol_nodelet.xml"/>
   </export>
 </package>

@@ -1,9 +1,0 @@
-<library path="lib/libdriver_nodelet">
-  <class name="scancontrol_driver/DriverNodelet"
-         type="scancontrol_driver::DriverNodelet"
-         base_class_type="nodelet::Nodelet">
-    <description> 
-      Publish scanCONTROL pointclouds
-    </description>
-  </class>
-</library>

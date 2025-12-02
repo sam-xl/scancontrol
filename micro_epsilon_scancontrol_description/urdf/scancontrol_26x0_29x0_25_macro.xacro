@@ -7,7 +7,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
         <geometry>
-          <mesh filename="package://micro_epsilon_scancontrol_description/meshes/visual/visual.dae"/>
+          <mesh filename="package://micro_epsilon_scancontrol_description/meshes/visual/26x0_29x0_25.dae"/>
        </geometry>
        <material name="microepsilon_silver">
          <color rgba="0.7 0.7 0.7 1.0"/>
@@ -16,7 +16,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="${pi/2} 0 ${pi/2}"/>
         <geometry>
-          <mesh filename="package://micro_epsilon_scancontrol_description/meshes/collision/collision.stl"/>
+          <mesh filename="package://micro_epsilon_scancontrol_description/meshes/collision/26x0_29x0_25.stl"/>
         </geometry>
       </collision>
     </link>

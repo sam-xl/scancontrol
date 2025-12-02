@@ -2,27 +2,34 @@
 
 namespace scancontrol_driver
 {
-ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private_nh)
+ScanControlDriver::ScanControlDriver()
+  : Node("scancontrol_driver")
 {
   /*
-      Store the ros::NodeHandle objects and extract the relevant parameters.
+      Extract the relevant parameters.
   */
-  nh_ = nh;
-  private_nh_ = private_nh;
 
   // Device settings
-  private_nh_.param("resolution", config_.resolution, -1);
+  this->declare_parameter<int>("resolution", -1);
+  this->get_parameter_or("resolution", config_.resolution, -1);
 
   // Multiple device parameters
-  private_nh_.param("serial", config_.serial, std::string(""));
-  private_nh_.param("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
-  private_nh_.param("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
+  this->declare_parameter<std::string>("serial", std::string(""));
+  this->get_parameter_or("serial", config_.serial, std::string(""));
+  this->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
+  this->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
+  this->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));
+  this->get_parameter_or("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
 
   // TODO: Are these parameters needed?
-  private_nh_.param("partial_profile_start_point", config_.pp_start_point, 0);
-  private_nh_.param("partial_profile_start_point_data", config_.pp_start_point_data, 4);
-  private_nh_.param("partial_profile_point_count", config_.pp_point_count, -1);
-  private_nh_.param("partial_profile_data_width", config_.pp_point_data_width, 4);
+  this->declare_parameter<int>("partial_profile_start_point", 0);
+  this->get_parameter_or("partial_profile_start_point", config_.pp_start_point, 0);
+  this->declare_parameter<int>("partial_profile_start_point_data", 0);
+  this->get_parameter_or("partial_profile_start_point_data", config_.pp_start_point_data, 0);
+  this->declare_parameter<int>("partial_profile_point_count", -1);
+  this->get_parameter_or("partial_profile_point_count", config_.pp_point_count, -1);
+  this->declare_parameter<int>("partial_profile_data_width", 8);
+  this->get_parameter_or("partial_profile_data_width", config_.pp_point_data_width, 8);
 
   // Create driver interface object:
   device_interface_ptr = std::make_unique<CInterfaceLLT>();
@@ -42,12 +49,14 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   return_code = device_interface_ptr->GetDeviceInterfaces(&available_interfaces[0], MAX_DEVICE_INTERFACE_COUNT);
   if (return_code == ERROR_GETDEVINTERFACE_REQUEST_COUNT)
   {
-    ROS_WARN_STREAM("There are more than " << MAX_DEVICE_INTERFACE_COUNT << " scanCONTROL sensors connected.");
+    RCLCPP_WARN_STREAM(logger,
+                       "There are more than " << MAX_DEVICE_INTERFACE_COUNT << " scanCONTROL sensors connected.");
     interface_count = MAX_DEVICE_INTERFACE_COUNT;
   }
   else if (return_code < 0)
   {
-    ROS_WARN_STREAM("An error occured while searching for connected scanCONTROL devices. Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger,
+                       "An error occured while searching for connected scanCONTROL devices. Code: " << return_code);
     interface_count = 0;
   }
   else
@@ -62,29 +71,29 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   gint8 selected_interface = -1;
   if (interface_count == 0)
   {
-    ROS_WARN("There is no scanCONTROL device connected. Exiting...");
+    RCLCPP_WARN(logger, "There is no scanCONTROL device connected. Exiting...");
     goto stop_initialization;
   }
   else if (interface_count == 1)
   {
-    ROS_INFO("There is 1 scanCONTROL device connected.");
+    RCLCPP_INFO(logger, "There is 1 scanCONTROL device connected.");
     selected_interface = 0;
 
     // Check if the available device is the same as the prefered device (if a serial is provided):
     std::string interface(available_interfaces[0]);
     if ((config_.serial == "") || (interface.find(config_.serial) > -1))
     {
-      ROS_INFO_STREAM("Interface found: " << interface);
+      RCLCPP_INFO_STREAM(logger, "Interface found: " << interface);
     }
     else
     {
-      ROS_WARN_STREAM("Interface not found! Searched for serial = " << config_.serial);
-      ROS_INFO_STREAM("Selected interface: " << interface);
+      RCLCPP_WARN_STREAM(logger, "Interface not found! Searched for serial = " << config_.serial);
+      RCLCPP_INFO_STREAM(logger, "Selected interface: " << interface);
     }
   }
   else
   {
-    ROS_INFO_STREAM("There are " << interface_count << " scanCONTROL devices connected.");
+    RCLCPP_INFO_STREAM(logger, "There are " << interface_count << " scanCONTROL devices connected.");
 
     // Select prefered device based on the defined ip or serial. If both are set, this selects the device which ip or
     // serial is encountered first.
@@ -95,7 +104,7 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
         std::string interface(available_interfaces[i]);
         if (interface.find(config_.serial) > -1)
         {
-          ROS_INFO_STREAM("Interface found: " << interface);
+          RCLCPP_INFO_STREAM(logger, "Interface found: " << interface);
           selected_interface = i;
           break;
         }
@@ -103,20 +112,22 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
       // Fallback if serial are not found:
       if (selected_interface == -1)
       {
-        ROS_WARN_STREAM("Interface not found! Searched for serial = " << config_.serial);
-        ROS_WARN("Available interfaces:");
+        RCLCPP_WARN_STREAM(logger, "Interface not found! Searched for serial = " << config_.serial);
+        RCLCPP_WARN(logger, "Available interfaces:");
         for (gint8 i = 0; i < interface_count; i++)
         {
-          ROS_WARN_STREAM("   " << available_interfaces[i]);
+          RCLCPP_WARN_STREAM(logger, "   " << available_interfaces[i]);
         }
         selected_interface = 0;
-        ROS_INFO_STREAM("\nSelecting first available interface: " << available_interfaces[selected_interface]);
+        RCLCPP_INFO_STREAM(logger,
+                           "\nSelecting first available interface: " << available_interfaces[selected_interface]);
       }
     }
     else
     {
       selected_interface = 0;
-      ROS_INFO_STREAM("No 'serial' set, selecting first interface: " << available_interfaces[selected_interface]);
+      RCLCPP_INFO_STREAM(logger,
+                         "No 'serial' set, selecting first interface: " << available_interfaces[selected_interface]);
     }
   }
 
@@ -128,7 +139,7 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   return_code = device_interface_ptr->SetDeviceInterface(available_interfaces[selected_interface]);
   if (return_code < GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Error while setting device ID! Code: " << return_code);
+    RCLCPP_FATAL_STREAM(logger, "Error while setting device ID! Code: " << return_code);
     goto stop_initialization;
   }
 
@@ -138,7 +149,7 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   return_code = device_interface_ptr->Connect();
   if (return_code < GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Error while connecting to device! Code: " << return_code);
+    RCLCPP_FATAL_STREAM(logger, "Error while connecting to device! Code: " << return_code);
     goto stop_initialization;
   }
 
@@ -148,39 +159,39 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   return_code = device_interface_ptr->GetLLTType(&device_type);
   if (return_code < GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Error while retrieving device type! Code: " << return_code);
+    RCLCPP_FATAL_STREAM(logger, "Error while retrieving device type! Code: " << return_code);
     goto stop_initialization;
   }
   if (device_type >= scanCONTROL27xx_25 && device_type <= scanCONTROL27xx_xxx)
   {
-    ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL27xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(logger, "The scanCONTROL is a scanCONTROL27xx, with serial number " << config_.serial << ".");
     config_.model = std::string("scanCONTROL27xx");
   }
   else if (device_type >= scanCONTROL26xx_25 && device_type <= scanCONTROL26xx_xxx)
   {
-    ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL26xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(logger, "The scanCONTROL is a scanCONTROL26xx, with serial number " << config_.serial << ".");
     config_.model = std::string("scanCONTROL26xx");
   }
   else if (device_type >= scanCONTROL29xx_25 && device_type <= scanCONTROL29xx_xxx)
   {
-    ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL29xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(logger, "The scanCONTROL is a scanCONTROL29xx, with serial number " << config_.serial << ".");
     config_.model = std::string("scanCONTROL29xx");
   }
   else if (device_type >= scanCONTROL30xx_25 && device_type <= scanCONTROL30xx_xxx)
   {
-    ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL30xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(logger, "The scanCONTROL is a scanCONTROL30xx, with serial number " << config_.serial << ".");
     config_.model = std::string("scanCONTROL30xx");
   }
   else if (device_type >= scanCONTROL25xx_25 && device_type <= scanCONTROL25xx_xxx)
   {
-    ROS_INFO_STREAM("The scanCONTROL is a scanCONTROL25xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(logger, "The scanCONTROL is a scanCONTROL25xx, with serial number " << config_.serial << ".");
     config_.model = std::string("scanCONTROL25xx");
   }
   else
   {
-    ROS_FATAL(
-        "The scanCONTROL device is a undefined type.\nPlease contact Micro-Epsilon for a newer SDK or update the "
-        "driver.");
+    RCLCPP_FATAL(logger,
+                 "The scanCONTROL device is a undefined type.\nPlease contact Micro-Epsilon for a newer SDK or update "
+                 "the driver.");
     goto stop_initialization;
   }
 
@@ -192,7 +203,8 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   if (return_code =
           device_interface_ptr->GetResolutions(&available_resolutions[0], MAX_RESOLUTION_COUNT) < GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Unable to request the available resolutions of the scanCONTROL device. Code: " << return_code);
+    RCLCPP_FATAL_STREAM(logger,
+                        "Unable to request the available resolutions of the scanCONTROL device. Code: " << return_code);
     goto stop_initialization;
   }
 
@@ -211,27 +223,27 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
     }
     if (selected_resolution == -1)
     {
-      ROS_WARN_STREAM("Requested resolution of " << std::to_string(config_.resolution)
-                                                 << " not found as available option.");
-      ROS_WARN("Available resolutions:");
+      RCLCPP_WARN_STREAM(logger, "Requested resolution of " << std::to_string(config_.resolution)
+                                                            << " not found as available option.");
+      RCLCPP_WARN(logger, "Available resolutions:");
       for (int i = 0; i < return_code; i++)
       {
-        ROS_WARN_STREAM("   " << std::to_string(available_resolutions[i]));
+        RCLCPP_WARN_STREAM(logger, "   " << std::to_string(available_resolutions[i]));
       }
       config_.resolution = available_resolutions[0];
-      ROS_INFO_STREAM("Selecting first available resolution: " << std::to_string(config_.resolution));
+      RCLCPP_INFO_STREAM(logger, "Selecting first available resolution: " << std::to_string(config_.resolution));
     }
   }
   else
   {
     config_.resolution = available_resolutions[0];
-    ROS_INFO_STREAM("No resolution set, selecting first available: " << std::to_string(config_.resolution));
+    RCLCPP_INFO_STREAM(logger, "No resolution set, selecting first available: " << std::to_string(config_.resolution));
   }
 
   // Set the selected resolution
   if (return_code = device_interface_ptr->SetResolution(config_.resolution) < GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Error while setting device resolution! CodeL " << return_code);
+    RCLCPP_FATAL_STREAM(logger, "Error while setting device resolution! CodeL " << return_code);
     goto stop_initialization;
   }
 
@@ -251,13 +263,13 @@ ScanControlDriver::ScanControlDriver(ros::NodeHandle nh, ros::NodeHandle private
   if ((return_code = device_interface_ptr->RegisterBufferCallback((gpointer)&NewProfileCallback, this)) <
       GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Error while registering buffer callback. Code: " << return_code);
+    RCLCPP_FATAL_STREAM(logger, "Error while registering buffer callback. Code: " << return_code);
     goto stop_initialization;
   }
   if ((return_code = device_interface_ptr->RegisterControlLostCallback((gpointer)&ControlLostCallback, this)) <
       GENERAL_FUNCTION_OK)
   {
-    ROS_FATAL_STREAM("Error while registering control lost callback. Code: " << return_code);
+    RCLCPP_FATAL_STREAM(logger, "Error while registering control lost callback. Code: " << return_code);
     goto stop_initialization;
   }
 
@@ -274,17 +286,26 @@ stop_initialization:
   }
 
   // Advertise topic
-  publisher = nh.advertise<point_cloud_t>(config_.topic_name, 10);
+  publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>(config_.topic_name, 10);
+
+  using std::placeholders::_1;
+  using std::placeholders::_2;
 
   // Advertise services
-  get_feature_srv = private_nh_.advertiseService("get_feature", &ScanControlDriver::ServiceGetFeature, this);
-  set_feature_srv = private_nh_.advertiseService("set_feature", &ScanControlDriver::ServiceSetFeature, this);
-  get_resolution_srv = private_nh_.advertiseService("get_resolution", &ScanControlDriver::ServiceGetResolution, this);
-  set_resolution_srv = private_nh_.advertiseService("set_resolution", &ScanControlDriver::ServiceSetResolution, this);
-  get_available_resolutions_srv = private_nh_.advertiseService(
-      "get_available_resolutions", &ScanControlDriver::ServiceGetAvailableResolutions, this);
-  invert_z_srv = private_nh_.advertiseService("invert_z", &ScanControlDriver::ServiceInvertZ, this);
-  invert_x_srv = private_nh_.advertiseService("invert_x", &ScanControlDriver::ServiceInvertX, this);
+  get_feature_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetFeature>(
+      "~/get_feature", std::bind(&ScanControlDriver::ServiceGetFeature, this, _1, _2));
+  set_feature_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetFeature>(
+      "~/set_feature", std::bind(&ScanControlDriver::ServiceSetFeature, this, _1, _2));
+  get_resolution_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetResolution>(
+      "~/get_resolution", std::bind(&ScanControlDriver::ServiceGetResolution, this, _1, _2));
+  set_resolution_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetResolution>(
+      "~/set_resolution", std::bind(&ScanControlDriver::ServiceSetResolution, this, _1, _2));
+  get_available_resolutions_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions>(
+      "~/get_available_resolutions", std::bind(&ScanControlDriver::ServiceGetAvailableResolutions, this, _1, _2));
+  invert_z_srv = this->create_service<std_srvs::srv::SetBool>(
+      "~/invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
+  invert_x_srv = this->create_service<std_srvs::srv::SetBool>(
+      "~/invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
 }
 
 int ScanControlDriver::SetPartialProfile(int& resolution)
@@ -293,7 +314,7 @@ int ScanControlDriver::SetPartialProfile(int& resolution)
   // Set profile configuration to partial profile
   if ((return_code = device_interface_ptr->SetProfileConfig(PARTIAL_PROFILE)) < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Error while setting profile config to PARTIAL_PROFILE. Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger, "Error while setting profile config to PARTIAL_PROFILE. Code: " << return_code);
     return GENERAL_FUNCTION_FAILED;
   }
 
@@ -313,7 +334,7 @@ int ScanControlDriver::SetPartialProfile(int& resolution)
                                          config_.pp_point_count;
 
     // Send warning and return failed
-    ROS_WARN_STREAM("Error while setting partial profile settings. Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger, "Error while setting partial profile settings. Code: " << return_code);
     return GENERAL_FUNCTION_FAILED;
   }
 
@@ -322,15 +343,15 @@ int ScanControlDriver::SetPartialProfile(int& resolution)
   lost_values = (16 + t_partial_profile_.nPointDataWidth - 1) / t_partial_profile_.nPointDataWidth;
   value_x.resize(t_partial_profile_.nPointCount);
   value_z.resize(t_partial_profile_.nPointCount);
-  ROS_INFO_STREAM("Profile is losing " << std::to_string(lost_values)
-                                       << " values due to timestamp of 16 byte at the end of the profile.");
+  RCLCPP_INFO_STREAM(logger, "Profile is losing " << std::to_string(lost_values)
+                                                  << " values due to timestamp of 16 byte at the end of the profile.");
 
   // Prepare new point cloud message
   point_cloud_msg.reset(new point_cloud_t);
   point_cloud_msg->header.frame_id = config_.frame_id;
   point_cloud_msg->height = 1;
-  point_cloud_msg->width = config_.resolution;
-  for (int i = 0; i < config_.resolution; i++)
+  point_cloud_msg->width = resolution;
+  for (int i = 0; i < resolution; i++)
   {
     pcl::PointXYZI point(1.0);
     point_cloud_msg->points.push_back(point);
@@ -345,7 +366,7 @@ int ScanControlDriver::StartProfileTransfer()
   int return_code = 0;
   if ((return_code = device_interface_ptr->TransferProfiles(NORMAL_TRANSFER, true)) < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Error while starting profile transfer! Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger, "Error while starting profile transfer! Code: " << return_code);
     return return_code;
   }
   transfer_active_ = true;
@@ -358,7 +379,7 @@ int ScanControlDriver::StopProfileTransfer()
   int return_code = 0;
   if ((return_code = device_interface_ptr->TransferProfiles(NORMAL_TRANSFER, false)) < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Error while stopping profile transfer. Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger, "Error while stopping profile transfer. Code: " << return_code);
     return return_code;
   }
   transfer_active_ = false;
@@ -368,9 +389,9 @@ int ScanControlDriver::StopProfileTransfer()
 /* Process raw profile data and create the point cloud message */
 int ScanControlDriver::Profile2PointCloud()
 {
-  device_interface_ptr->ConvertPartProfile2Values(&profile_buffer[0], profile_buffer.size(), &t_partial_profile_,
-                                                  device_type, 0, NULL, NULL, NULL, &value_x[0], &value_z[0], NULL,
-                                                  NULL);
+  int ret_code = device_interface_ptr->ConvertPartProfile2Values(&profile_buffer[0], profile_buffer.size(),
+                                                                 &t_partial_profile_, device_type, 0, NULL, NULL, NULL,
+                                                                 &value_x[0], &value_z[0], NULL, NULL);
   for (int i = 0; i < config_.resolution; i++)
   {
     point_cloud_msg->points[i].x = value_x[i] / 1000;
@@ -393,7 +414,7 @@ int ScanControlDriver::Profile2PointCloud()
 int ScanControlDriver::ProcessAndPublishProfile(const void* data, size_t data_size)
 {
   // Timestamp
-  pcl_conversions::toPCL(ros::Time::now(), point_cloud_msg->header.stamp);
+  pcl_conversions::toPCL(this->get_clock()->now(), point_cloud_msg->header.stamp);
 
   // Copy sensor data to local buffer
   if (data != NULL && data_size == profile_buffer.size())
@@ -403,7 +424,11 @@ int ScanControlDriver::ProcessAndPublishProfile(const void* data, size_t data_si
 
   // Process buffer and publish point cloud
   ScanControlDriver::Profile2PointCloud();
-  publisher.publish(point_cloud_msg);
+  // TODO: Is their a better way as long as pcl_ros is not ported to ROS2
+  sensor_msgs::msg::PointCloud2 output_msg;
+  pcl::toROSMsg<pcl::PointXYZI>(*point_cloud_msg, output_msg);
+
+  publisher->publish(output_msg);
 
   return GENERAL_FUNCTION_OK;
 }
@@ -413,9 +438,10 @@ int ScanControlDriver::ProcessAndPublishProfile(const void* data, size_t data_si
 int ScanControlDriver::GetFeature(unsigned int setting_id, unsigned int* value)
 {
   int return_code = 0;
-  if (return_code = device_interface_ptr->GetFeature(setting_id, value) < GENERAL_FUNCTION_OK)
+  return_code = device_interface_ptr->GetFeature(setting_id, value);
+  if (return_code < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Setting could not be retrieved. Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger, "Setting could not be retrieved. Code: " << return_code);
     return return_code;
   }
   return GENERAL_FUNCTION_OK;
@@ -433,108 +459,114 @@ int ScanControlDriver::SetFeature(unsigned int setting_id, unsigned int value)
        features_with_corruption_risk.end()) &&
       transfer_active_)
   {
-    ROS_INFO("Risk of profile corruption, temporarily stopping profile transfer.");
+    RCLCPP_INFO(logger, "Risk of profile corruption, temporarily stopping profile transfer.");
     if (return_code = ScanControlDriver::StopProfileTransfer() < GENERAL_FUNCTION_OK)
     {
-      ROS_WARN_STREAM("Profile transfer could not be stopped. Code: " << return_code);
+      RCLCPP_WARN_STREAM(logger, "Profile transfer could not be stopped. Code: " << return_code);
       return -1;
     }
     if (return_code = device_interface_ptr->SetFeature(setting_id, value) < GENERAL_FUNCTION_OK)
     {
-      ROS_WARN_STREAM("Feature could not be set. Code: " << return_code);
+      RCLCPP_WARN_STREAM(logger, "Feature could not be set. Code: " << return_code);
       return return_code;
     }
     if (return_code = ScanControlDriver::StartProfileTransfer() < GENERAL_FUNCTION_OK)
     {
-      ROS_WARN_STREAM("Profile transfer could not be restarted after changing feature. Code: " << return_code);
+      RCLCPP_WARN_STREAM(logger,
+                         "Profile transfer could not be restarted after changing feature. Code: " << return_code);
       return -1;
     }
     return GENERAL_FUNCTION_OK;
   }
   if (return_code = device_interface_ptr->SetFeature(setting_id, value) < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Feature could not be set. Code: " << return_code);
+    RCLCPP_WARN_STREAM(logger, "Feature could not be set. Code: " << return_code);
     return return_code;
   }
   return GENERAL_FUNCTION_OK;
 }
 
 /* Wrapper of the SetFeature call for use by the ServiceSetFeature service */
-bool ScanControlDriver::ServiceSetFeature(micro_epsilon_scancontrol_msgs::SetFeature::Request& request,
-                                          micro_epsilon_scancontrol_msgs::SetFeature::Response& response)
+void ScanControlDriver::ServiceSetFeature(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Response> response)
 {
-  response.return_code = ScanControlDriver::SetFeature(request.setting, request.value);
-  return true;
+  response->return_code = ScanControlDriver::SetFeature(request->setting, request->value);
 }
 
 /* Wrapper of the GetFeature call for use by the ServiceGetFeature service */
-bool ScanControlDriver::ServiceGetFeature(micro_epsilon_scancontrol_msgs::GetFeature::Request& request,
-                                          micro_epsilon_scancontrol_msgs::GetFeature::Response& response)
+void ScanControlDriver::ServiceGetFeature(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetFeature::Response> response)
 {
-  response.return_code = ScanControlDriver::GetFeature(request.setting, &(response.value));
-  return true;
+  response->return_code = ScanControlDriver::GetFeature(request->setting, &(response->value));
 }
 
 /* Wrapper of the SetResolution call for use by the ServiceSetResolution service */
-bool ScanControlDriver::ServiceSetResolution(micro_epsilon_scancontrol_msgs::SetResolution::Request& request,
-                                             micro_epsilon_scancontrol_msgs::SetResolution::Response& response)
+void ScanControlDriver::ServiceSetResolution(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetResolution::Response> response)
 {
-  if (response.return_code = StopProfileTransfer() < GENERAL_FUNCTION_OK)
+  response->return_code = StopProfileTransfer();
+  if (response->return_code < GENERAL_FUNCTION_OK)
   {
-    return true;
+    RCLCPP_WARN_STREAM(logger, "Error while stopping transmission! Code: " << response->return_code);
+    return;
   }
-  if (response.return_code = device_interface_ptr->SetResolution(request.resolution) < GENERAL_FUNCTION_OK)
+  response->return_code = device_interface_ptr->SetResolution(request->resolution);
+  if (response->return_code < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Error while setting device resolution! Code: " << response.return_code);
-    return true;
+    RCLCPP_WARN_STREAM(logger, "Error while setting device resolution! Code: " << response->return_code);
   }
-  int temp_resolution = request.resolution;
-  if (response.return_code = SetPartialProfile(temp_resolution) < GENERAL_FUNCTION_OK)
+  int temp_resolution = request->resolution;
+  response->return_code = SetPartialProfile(temp_resolution);
+  if (response->return_code < GENERAL_FUNCTION_OK)
   {
-    ROS_WARN_STREAM("Error while setting partial profile. Code: " << response.return_code);
-    return true;
+    RCLCPP_WARN_STREAM(logger, "Error while setting partial profile. Code: " << response->return_code);
+    return;
   }
-  if (response.return_code = StartProfileTransfer() < GENERAL_FUNCTION_OK)
+  response->return_code = StartProfileTransfer();
+  if (response->return_code < GENERAL_FUNCTION_OK)
   {
-    return true;
+    RCLCPP_WARN_STREAM(logger, "Error while starting transmission! Code: " << response->return_code);
+    return;
   }
 
-  // Change of resolution was succesull
-  config_.resolution = request.resolution;
-  return true;
+  // Change of resolution was successful
+  config_.resolution = request->resolution;
 }
 
 /* Wrapper of the GetResolution call for use by the ServiceGetResolution service */
-bool ScanControlDriver::ServiceGetResolution(micro_epsilon_scancontrol_msgs::GetResolution::Request& request,
-                                             micro_epsilon_scancontrol_msgs::GetResolution::Response& response)
+void ScanControlDriver::ServiceGetResolution(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetResolution::Response> response)
 {
-  response.return_code = device_interface_ptr->GetResolution(&(response.resolution));
-  return true;
+  response->return_code = device_interface_ptr->GetResolution(&(response->resolution));
 }
 
 /* Wrapper of the GetResolutions call for use by the ServiceGetAvailableResolutions service */
-bool ScanControlDriver::ServiceGetAvailableResolutions(
-    micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Request& request,
-    micro_epsilon_scancontrol_msgs::GetAvailableResolutions::Response& response)
+void ScanControlDriver::ServiceGetAvailableResolutions(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetAvailableResolutions::Response> response)
 {
   guint32 available_resolutions[MAX_RESOLUTION_COUNT] = { 0 };
-  response.return_code = device_interface_ptr->GetResolutions(&available_resolutions[0], MAX_RESOLUTION_COUNT);
+  response->return_code = device_interface_ptr->GetResolutions(&available_resolutions[0], MAX_RESOLUTION_COUNT);
   for (int i = 0; i < MAX_RESOLUTION_COUNT; i++)
   {
     if (available_resolutions[i] > 0)
     {
-      response.resolutions.push_back(available_resolutions[i]);
+      response->resolutions.push_back(available_resolutions[i]);
     }
   }
-  return true;
 }
 
 /*
 Enable or disable the inversion of Z values on the scanCONTROL device:
-    If request.data == true > Enable the inversion of Z values on the scanCONTROL device. (Default of the scanCONTROL
-device) If request.data == false > Disable the inversion of Z values on the scanCONTROL device.
+    If request->data == true > Enable the inversion of Z values on the scanCONTROL device. (Default of the scanCONTROL
+device) If request->data == false > Disable the inversion of Z values on the scanCONTROL device.
 */
-bool ScanControlDriver::ServiceInvertZ(std_srvs::SetBool::Request& request, std_srvs::SetBool::Response& response)
+void ScanControlDriver::ServiceInvertZ(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                       std::shared_ptr<std_srvs::srv::SetBool::Response> response)
 {
   unsigned int value;
   int return_code;
@@ -544,15 +576,15 @@ bool ScanControlDriver::ServiceInvertZ(std_srvs::SetBool::Request& request, std_
           ScanControlDriver::GetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA, &value) < GENERAL_FUNCTION_OK)
   {
     // Failed to get PROCESSING feature
-    response.success = false;
-    response.message =
+    response->success = false;
+    response->message =
         std::string("Failed to get 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-    return true;
+    return;
   }
 
   // Set 6th bit according to the SetBool service request
   value = value & ~(1 << 6);
-  if (request.data)
+  if (request->data)
   {
     value |= (1 << 6);
   }
@@ -561,23 +593,22 @@ bool ScanControlDriver::ServiceInvertZ(std_srvs::SetBool::Request& request, std_
   if (return_code = ScanControlDriver::SetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA, value) < GENERAL_FUNCTION_OK)
   {
     // Failed to set PROCESSING feature
-    response.success = false;
-    response.message =
+    response->success = false;
+    response->message =
         std::string("Failed to set 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-    return true;
+    return;
   }
 
-  response.success = true;
-
-  return true;
+  response->success = true;
 }
 
 /*
 Enable or disable the inversion of X values on the scanCONTROL device:
-    If request.data == true > Enable the inversion of X values on the scanCONTROL device. (Default of the scanCONTROL
-device) If request.data == false > Disable the inversion of X values on the scanCONTROL device.
+    If request->data == true > Enable the inversion of X values on the scanCONTROL device. (Default of the scanCONTROL
+device) If request->data == false > Disable the inversion of X values on the scanCONTROL device.
 */
-bool ScanControlDriver::ServiceInvertX(std_srvs::SetBool::Request& request, std_srvs::SetBool::Response& response)
+void ScanControlDriver::ServiceInvertX(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                       std::shared_ptr<std_srvs::srv::SetBool::Response> response)
 {
   unsigned int value;
   int return_code;
@@ -587,15 +618,15 @@ bool ScanControlDriver::ServiceInvertX(std_srvs::SetBool::Request& request, std_
           ScanControlDriver::GetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA, &value) < GENERAL_FUNCTION_OK)
   {
     // Failed to get PROCESSING feature
-    response.success = false;
-    response.message =
+    response->success = false;
+    response->message =
         std::string("Failed to get 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-    return true;
+    return;
   }
 
   // Set 6th bit according to the SetBool service request
   value = value & ~(1 << 7);
-  if (request.data)
+  if (request->data)
   {
     value |= (1 << 7);
   }
@@ -604,15 +635,13 @@ bool ScanControlDriver::ServiceInvertX(std_srvs::SetBool::Request& request, std_
   if (return_code = ScanControlDriver::SetFeature(FEATURE_FUNCTION_PROCESSING_PROFILEDATA, value) < GENERAL_FUNCTION_OK)
   {
     // Failed to set PROCESSING feature
-    response.success = false;
-    response.message =
+    response->success = false;
+    response->message =
         std::string("Failed to set 'Profile Data Processing' feature. Error code: ") + std::to_string(return_code);
-    return true;
+    return;
   }
 
-  response.success = true;
-
-  return true;
+  response->success = true;
 }
 
 /* Callback for when a new profile is read, for use with the scanCONTROL API. */
@@ -628,8 +657,8 @@ void NewProfileCallback(const void* data, size_t data_size, gpointer user_data)
 /* Callback for when connection to the device is lost, for use with the scanCONTROL API. */
 void ControlLostCallback(ArvGvDevice* mydevice, gpointer user_data)
 {
-  ROS_FATAL("Conrol of scanCONTROL device lost!");
-  ros::shutdown();
+  RCLCPP_FATAL(logger, "Conrol of scanCONTROL device lost!");
+  rclcpp::shutdown();
 }
 
 }  // namespace scancontrol_driver

@@ -132,6 +132,7 @@ private:
   std::vector<double> value_x, value_z;
   int lost_values;
   unsigned int lost_profiles;
+  std::vector<unsigned short> maximum_intensity, threshold;
 
   point_cloud_t::Ptr point_cloud_msg;
 

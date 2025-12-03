@@ -361,6 +361,8 @@ int ScanControlDriver::SetPartialProfile(int& resolution)
   lost_values = (16 + t_partial_profile_.nPointDataWidth - 1) / t_partial_profile_.nPointDataWidth;
   value_x.resize(t_partial_profile_.nPointCount);
   value_z.resize(t_partial_profile_.nPointCount);
+  maximum_intensity.resize(t_partial_profile_.nPointCount);
+  threshold.resize(t_partial_profile_.nPointCount);
   RCLCPP_INFO_STREAM(this->get_logger(), "Profile is losing " << std::to_string(lost_values)
                                                               << " values due to timestamp of 16 byte at the end of "
                                                                  "the profile.");
@@ -408,9 +410,9 @@ int ScanControlDriver::StopProfileTransfer()
 /* Process raw profile data and create the point cloud message */
 int ScanControlDriver::Profile2PointCloud()
 {
-  int ret_code = device_interface_ptr->ConvertPartProfile2Values(&profile_buffer[0], profile_buffer.size(),
-                                                                 &t_partial_profile_, device_type, 0, NULL, NULL, NULL,
-                                                                 &value_x[0], &value_z[0], NULL, NULL);
+  int ret_code = device_interface_ptr->ConvertPartProfile2Values(
+      &profile_buffer[0], profile_buffer.size(), &t_partial_profile_, device_type, 0, NULL, &maximum_intensity[0],
+      &threshold[0], &value_x[0], &value_z[0], NULL, NULL);
   for (int i = 0; i < config_.resolution; i++)
   {
     point_cloud_msg->points[i].x = value_x[i] / 1000;
@@ -424,6 +426,7 @@ int ScanControlDriver::Profile2PointCloud()
     else
     {
       point_cloud_msg->points[i].z = value_z[i] / 1000;
+      point_cloud_msg->points[i].intensity = maximum_intensity[i];
     }
   }
   return GENERAL_FUNCTION_OK;

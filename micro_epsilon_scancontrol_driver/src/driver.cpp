@@ -314,6 +314,8 @@ stop_initialization:
       "~/set_idle_duration", std::bind(&ScanControlDriver::ServiceSetIdleDuration, this, _1, _2));
   get_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
       "~/get_idle_duration", std::bind(&ScanControlDriver::ServiceGetIdleDuration, this, _1, _2));
+  toggle_laser_srv = this->create_service<std_srvs::srv::SetBool>(
+      "~/toggle_laser", std::bind(&ScanControlDriver::ServiceToggleLaserPower, this, _1, _2));
 }
 
 int ScanControlDriver::SetPartialProfile(int& resolution)
@@ -753,6 +755,34 @@ void ScanControlDriver::ServiceGetIdleDuration(
     std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Response> response)
 {
   response->return_code = GetDuration(FEATURE_FUNCTION_IDLE_TIME, &(response->duration));
+}
+
+/*
+  Turn the laser power on or off and start/stop the profile transfer accordingly.
+    If request->data == true > Turn On Laser and start profile transfer.
+    If request->data == false > Turn Off Laser and stop profile transfer.
+*/
+void ScanControlDriver::ServiceToggleLaserPower(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                                                std::shared_ptr<std_srvs::srv::SetBool::Response> response)
+{
+  int ret_code;
+  if (request->data)
+  {  // Turn On Laser
+    this->SetFeature(FEATURE_FUNCTION_LASERPOWER, 2);
+    ret_code = this->StartProfileTransfer();
+  }
+  else
+  {  // Turn Off Laser
+    this->SetFeature(FEATURE_FUNCTION_LASERPOWER, 0);
+    ret_code = this->StopProfileTransfer();
+  }
+
+  if (ret_code < GENERAL_FUNCTION_OK)
+  {
+    response->success = false;
+    return;
+  }
+  response->success = true;
 }
 
 /* Callback for when a new profile is read, for use with the scanCONTROL API. */

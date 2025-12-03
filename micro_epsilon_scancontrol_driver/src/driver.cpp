@@ -315,6 +315,14 @@ stop_initialization:
       "~/invert_z", std::bind(&ScanControlDriver::ServiceInvertZ, this, _1, _2));
   invert_x_srv = this->create_service<std_srvs::srv::SetBool>(
       "~/invert_x", std::bind(&ScanControlDriver::ServiceInvertX, this, _1, _2));
+  set_exposure_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetDuration>(
+      "~/set_exposure_duration", std::bind(&ScanControlDriver::ServiceSetExposureDuration, this, _1, _2));
+  get_exposure_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
+      "~/get_exposure_duration", std::bind(&ScanControlDriver::ServiceGetExposureDuration, this, _1, _2));
+  set_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::SetDuration>(
+      "~/set_idle_duration", std::bind(&ScanControlDriver::ServiceSetIdleDuration, this, _1, _2));
+  get_idle_duration_srv = this->create_service<micro_epsilon_scancontrol_msgs::srv::GetDuration>(
+      "~/get_idle_duration", std::bind(&ScanControlDriver::ServiceGetIdleDuration, this, _1, _2));
 }
 
 int ScanControlDriver::SetPartialProfile(int& resolution)
@@ -650,6 +658,101 @@ void ScanControlDriver::ServiceInvertX(const std::shared_ptr<std_srvs::srv::SetB
   }
 
   response->success = true;
+}
+
+/*
+  Generic function for setting duration based values, like exposure and idle time.
+    setting_id: id used for the SetFeature call
+    value: time in microseconds. min: 1 mus, max: 40950 mus ; e.g. 1005 = 1.005ms
+*/
+int ScanControlDriver::SetDuration(unsigned int setting_id, unsigned int value)
+{
+  // Encoded the value to a binary format in 1 mus steps. See "Operation manual part B scancontrol" for details.
+  uint32_t remainder = ((value % 10) << 12) & 0xF000;  // Remainder is left shifted first and bits 0-12 are masked. the
+                                                       // quotient will occupy this area.
+  uint32_t quotient = ((value / 10)) & 0xFFF;          // take the quotient and mask bits 12-15
+  uint32_t encoded_value = remainder + quotient;
+
+  // success if value was sent AND set.
+  if (auto return_code = SetFeature(setting_id, encoded_value); return_code < GENERAL_FUNCTION_OK)
+  {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "SetFeature failed. Return code:" << return_code);
+    return return_code;
+  }
+
+  // Check if returned value from laser matches the request
+  unsigned int actual_value = 0;
+  if (auto return_code = GetDuration(setting_id, &actual_value); actual_value != value)
+  {
+    RCLCPP_WARN(this->get_logger(), "Requested value and actual value do not match.");
+    return return_code;
+  }
+  return GENERAL_FUNCTION_OK;
+}
+
+/*
+  Generic function for getting duration based values, like exposure and idle time.
+    setting_id: id used for the GetFeature call
+    value: time in microseconds. min: 1 mus, max: 40950 mus ; e.g. 1005 = 1.005ms
+*/
+int ScanControlDriver::GetDuration(unsigned int setting_id, unsigned int* value)
+{
+  if (auto return_code = GetFeature(setting_id, value); return_code < GENERAL_FUNCTION_OK)
+  {
+    RCLCPP_ERROR_STREAM(this->get_logger(), "GetFeature failed. Return code: " << return_code);
+    return return_code;
+  }
+
+  // Decode the binary value. See "Operation manual part B scancontrol" for details.
+  uint32_t quotient = *value & 0xFFF;         // Extract ExposureTime / 10
+  uint32_t remainder = (*value >> 12) & 0xF;  // Extract ExposureTime % 10
+  *value = (quotient * 10) + remainder;       // Reconstruct ExposureTime
+
+  return GENERAL_FUNCTION_OK;
+}
+
+/*
+  Set the exposure time (duration) of the scanCONTROL device.
+    request->duration: time in microseconds. min: 1 mus, max: 40950 mus ; e.g. 1005 = 1.005ms
+*/
+void ScanControlDriver::ServiceSetExposureDuration(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Response> response)
+{
+  response->return_code = SetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, request->duration);
+}
+
+/*
+  Get the exposure time (duration) of the scanCONTROL device.
+    response->duration: time in microseconds. min: 1 mus, max: 40950 mus ; e.g. 1005 = 1.005ms
+*/
+void ScanControlDriver::ServiceGetExposureDuration(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Response> response)
+{
+  response->return_code = GetDuration(FEATURE_FUNCTION_EXPOSURE_TIME, &(response->duration));
+}
+
+/*
+  Set the idle time (duration) of the scanCONTROL device.
+    request->duration: time in microseconds. min: 1 mus, max: 40950 mus ; e.g. 1005 = 1.005ms
+*/
+void ScanControlDriver::ServiceSetIdleDuration(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Response> response)
+{
+  response->return_code = SetDuration(FEATURE_FUNCTION_IDLE_TIME, request->duration);
+}
+
+/*
+  Get the idle time (duration) of the scanCONTROL device.
+    response->duration: time in microseconds. min: 1 mus, max: 40950 mus ; e.g. 1005 = 1.005ms
+*/
+void ScanControlDriver::ServiceGetIdleDuration(
+    const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Request> request,
+    std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Response> response)
+{
+  response->return_code = GetDuration(FEATURE_FUNCTION_IDLE_TIME, &(response->duration));
 }
 
 /* Callback for when a new profile is read, for use with the scanCONTROL API. */

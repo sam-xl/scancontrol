@@ -8,8 +8,10 @@
 
 #include <memory>
 #include <micro_epsilon_scancontrol_msgs/srv/get_available_resolutions.hpp>
+#include <micro_epsilon_scancontrol_msgs/srv/get_duration.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_feature.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/get_resolution.hpp>
+#include <micro_epsilon_scancontrol_msgs/srv/set_duration.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_feature.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_resolution.hpp>
 #include <rclcpp/rclcpp.hpp>
@@ -47,6 +49,8 @@ public:
   // Device setting functions
   int GetFeature(unsigned int setting_id, unsigned int* value);
   int SetFeature(unsigned int setting_id, unsigned int value);
+  int SetDuration(unsigned int setting_id, unsigned int value);
+  int GetDuration(unsigned int setting_id, unsigned int* value);
 
   // Get configuration parameters
   std::string serial() const
@@ -74,6 +78,18 @@ public:
                       std::shared_ptr<std_srvs::srv::SetBool::Response> response);
   void ServiceInvertX(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
                       std::shared_ptr<std_srvs::srv::SetBool::Response> response);
+  void
+  ServiceSetExposureDuration(const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Request> request,
+                             std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Response> response);
+  void
+  ServiceGetExposureDuration(const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Request> request,
+                             std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Response> response);
+  void ServiceSetIdleDuration(const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Request> request,
+                              std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetDuration::Response> response);
+  void ServiceGetIdleDuration(const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Request> request,
+                              std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::GetDuration::Response> response);
+  void ServiceToggleLaserPower(const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+                               std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
 private:
   // Profile functions
@@ -105,6 +121,11 @@ private:
       get_available_resolutions_srv;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_z_srv;
   rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr invert_x_srv;
+  rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetDuration>::SharedPtr set_exposure_duration_srv;
+  rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetDuration>::SharedPtr get_exposure_duration_srv;
+  rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::SetDuration>::SharedPtr set_idle_duration_srv;
+  rclcpp::Service<micro_epsilon_scancontrol_msgs::srv::GetDuration>::SharedPtr get_idle_duration_srv;
+  rclcpp::Service<std_srvs::srv::SetBool>::SharedPtr toggle_laser_srv;
 
   // Driver objects
   std::unique_ptr<CInterfaceLLT> device_interface_ptr;

@@ -14,13 +14,17 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   
+  <depend>aravis-dev</depend>
+  <depend>libglib-dev</depend>
+
   <depend>rclcpp</depend>
   <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
   <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
-  <depend>sensor_msgs</depend>
-  <depend>micro_epsilon_scancontrol_msgs</depend>
 
+  <depend>micro_epsilon_scancontrol_msgs</depend>
+  
   <export>
     <build_type>ament_cmake</build_type>
   </export>

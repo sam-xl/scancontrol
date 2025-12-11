@@ -23,7 +23,7 @@
 #define MAX_RESOLUTION_COUNT 6
 #define GENERAL_FUNCTION_FAILED -1
 
-#define DEFAULT_FRAME_ID "scancontrol"
+#define DEFAULT_FRAME_ID "optical_frame"
 #define TOPIC_NAME "~profiles"
 
 typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;

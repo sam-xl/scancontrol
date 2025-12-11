@@ -1,5 +1,5 @@
 <launch>
-    <arg name="frame_id" default="scancontrol_frame"
+    <arg name="frame_id" default="optical_frame"
         description="The `frame_id` used to publish the profiles/pointclould data with."/>
     <arg name="serial" default=""
         description="Select a specific sensor to connect to by specifying its serial (number). If left empty, the driver will connect to the first found sensor"/>

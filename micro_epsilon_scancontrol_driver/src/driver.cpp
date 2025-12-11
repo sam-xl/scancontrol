@@ -18,8 +18,6 @@ ScanControlDriver::ScanControlDriver()
   this->get_parameter_or("serial", config_.serial, std::string(""));
   this->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
   this->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
-  this->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));
-  this->get_parameter_or("topic_name", config_.topic_name, std::string(DEFAULT_TOPIC_NAME));
 
   // TODO: Are these parameters needed?
   this->declare_parameter<int>("partial_profile_start_point", 0);
@@ -286,7 +284,7 @@ stop_initialization:
   }
 
   // Advertise topic
-  publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>(config_.topic_name, 10);
+  publisher = this->create_publisher<sensor_msgs::msg::PointCloud2>(TOPIC_NAME, 10);
 
   using std::placeholders::_1;
   using std::placeholders::_2;

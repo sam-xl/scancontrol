@@ -24,7 +24,7 @@
 #define GENERAL_FUNCTION_FAILED -1
 
 #define DEFAULT_FRAME_ID "scancontrol"
-#define DEFAULT_TOPIC_NAME "scancontrol_pointcloud"
+#define TOPIC_NAME "~profiles"
 
 typedef pcl::PointCloud<pcl::PointXYZI> point_cloud_t;
 
@@ -101,7 +101,6 @@ private:
     std::string model;
     std::string serial;
     std::string interface;
-    std::string topic_name;
     int resolution;
     int pp_start_point;
     int pp_start_point_data;

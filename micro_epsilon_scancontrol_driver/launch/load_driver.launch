@@ -1,11 +1,11 @@
 <launch>
+    <arg name="ip" default=""
+        description="Select a specific sensor to connect to by specifying its IP address. If left empty, the driver will connect to the first found sensor"/>
     <arg name="frame_id" default="optical_frame"
         description="The `frame_id` used to publish the profiles/pointclould data with."/>
-    <arg name="serial" default=""
-        description="Select a specific sensor to connect to by specifying its serial (number). If left empty, the driver will connect to the first found sensor"/>
 
     <node pkg="micro_epsilon_scancontrol_driver" exec="driver_node" name="scancontrol_driver">
+        <param name="ip" value="$(var ip)"/>
         <param name="frame_id" value="$(var frame_id)"/>
-        <param name="serial" value="$(var serial)"/>
     </node>
 </launch>

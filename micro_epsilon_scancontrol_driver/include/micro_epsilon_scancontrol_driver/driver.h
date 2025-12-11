@@ -53,10 +53,6 @@ public:
   int GetDuration(unsigned int setting_id, unsigned int* value);
 
   // Get configuration parameters
-  std::string serial() const
-  {
-    return config_.serial;
-  };
   int resolution() const
   {
     return config_.resolution;
@@ -92,6 +88,8 @@ public:
                                std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
 private:
+  std::vector<std::string> GetDeviceInterfaces();
+  
   // Profile functions
   int Profile2PointCloud();
   // Configuration storage
@@ -99,7 +97,6 @@ private:
   {
     std::string frame_id;
     std::string model;
-    std::string serial;
     std::string interface;
     int resolution;
     int pp_start_point;

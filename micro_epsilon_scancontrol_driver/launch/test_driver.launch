@@ -1,15 +1,14 @@
 <launch>
+    <arg name="ip" default=""
+        description="Select a specific sensor to connect to by specifying its IP address. If left empty, the driver will connect to the first found sensor"/>
+    <arg name="frame_id" default="optical_frame"
+        description="The `frame_id` used to publish the profiles/pointcould data with."/>
     <arg name="scancontrol_type" default="26x0_29x0_25"
         description="scanCONTROL type to use for the visualization"/>
-    
-    <arg name="frame_id" default="scancontrol_frame"
-        description="The `frame_id` used to publish the profiles/pointclould data with."/>
-    <arg name="serial" default=""
-        description="Select a specific sensor to connect to by specifying its serial number. If left empty, the driver will connect to the first found sensor"/>
 
     <include file="$(find-pkg-share micro_epsilon_scancontrol_driver)/launch/load_driver.launch">
+        <arg name="ip" value="$(var ip)"/>
         <arg name="frame_id" value="$(var frame_id)"/>
-        <arg name="serial" value="$(var serial)"/>
     </include>
     <include file="$(find-pkg-share micro_epsilon_scancontrol_description)/launch/load_scancontrol_$(var scancontrol_type).launch" />
     <node pkg="joint_state_publisher" exec="joint_state_publisher" name="joint_state_publisher" >

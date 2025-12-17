@@ -1,7 +1,6 @@
 <?xml version="1.0" ?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <!-- Macro for both 26x0 and 29x0 - 25 scan control sensor productlines -->
   <xacro:macro name="microepsilon_scancontrol_27x0_100" params="prefix">
     <link name="${prefix}base_link">
       <visual>

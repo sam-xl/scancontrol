@@ -25,8 +25,8 @@ jobs:
     strategy:
       matrix:
         env:
-          - {OS_NAME: ubuntu, OS_CODE_NAME: jammy, ROS_DISTRO: humble, DOCKER_IMAGE: "samxl/scancontrol:humble", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '10'}
-          - {OS_NAME: ubuntu, OS_CODE_NAME: noble, ROS_DISTRO: jazzy, DOCKER_IMAGE: "samxl/scancontrol:jazzy", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '10'}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: jammy, ROS_DISTRO: humble, DOCKER_IMAGE: "samxl/scancontrol:humble", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '14'}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: noble, ROS_DISTRO: jazzy, DOCKER_IMAGE: "samxl/scancontrol:jazzy", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '14'}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

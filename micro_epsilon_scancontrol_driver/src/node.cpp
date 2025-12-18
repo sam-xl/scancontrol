@@ -7,23 +7,25 @@ int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
 
-  // Start the driver
+  rclcpp::executors::SingleThreadedExecutor exec;
+  rclcpp::NodeOptions options;
+
   try
   {
-    std::shared_ptr<scancontrol_driver::ScanControlDriver> driver =
-        std::make_shared<scancontrol_driver::ScanControlDriver>();
-    RCLCPP_INFO(driver->get_logger(), "Driver started");
+    auto driver = std::make_shared<scancontrol_driver::ScanControlDriver>(options);
+    exec.add_node(driver);
 
-    // Loop driver until shutdown
     driver->StartProfileTransfer();
-    rclcpp::spin(driver);
+    exec.spin();
+
     driver->StopProfileTransfer();
+    rclcpp::shutdown();
     return 0;
   }
   catch (const std::runtime_error& error)
   {
     RCLCPP_FATAL_STREAM(rclcpp::get_logger("micro_epsilon_scancontrol_driver"),
-                        "Unable to create driver node. Error: " << error.what());
+                        "Unable to create driver component. Error: " << error.what());
     rclcpp::shutdown();
     return 1;
   }

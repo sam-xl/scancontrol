@@ -34,7 +34,7 @@ class ScanControlDriver : public rclcpp::Node
 {
 public:
   // Constructor and destructor
-  explicit ScanControlDriver();
+  explicit ScanControlDriver(const rclcpp::NodeOptions& options = rclcpp::NodeOptions());
   ~ScanControlDriver() = default;
 
   // Profile functions

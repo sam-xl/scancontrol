@@ -2,8 +2,8 @@
 
 namespace scancontrol_driver
 {
-ScanControlDriver::ScanControlDriver()
-  : Node("scancontrol_driver")
+ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
+  : Node("scancontrol_driver", options)
 {
   /*
       Extract the relevant parameters.
@@ -806,3 +806,6 @@ void ControlLostCallback(ArvGvDevice* mydevice, gpointer user_data)
 }
 
 }  // namespace scancontrol_driver
+
+#include "rclcpp_components/register_node_macro.hpp"
+RCLCPP_COMPONENTS_REGISTER_NODE(scancontrol_driver::ScanControlDriver)

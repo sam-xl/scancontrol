@@ -29,17 +29,17 @@ RUN wget https://software.micro-epsilon.com/scanCONTROL-Linux-SDK-${SCANCONTROL_
     rm scanCONTROL-Linux-SDK-${SCANCONTROL_SDK_VERSION//./-}.zip
 
 # Fix for libllt build errors
-RUN cd /scanCONTROL-Linux-SDK/libllt && \
-    sed -i '27,29 s/^/\/\/ /; 31,33 s/^/\/\/ /;' include/llt.h
+WORKDIR /scanCONTROL-Linux-SDK/libllt/
+RUN sed -i '27,29 s/^/\/\/ /; 31,33 s/^/\/\/ /;' include/llt.h
 
-RUN cd scanCONTROL-Linux-SDK/libmescan/ && \ 
-    meson setup build && \
+WORKDIR /scanCONTROL-Linux-SDK/libmescan/
+RUN meson setup build && \
     cd build && \
     ninja && \
     checkinstall --pkgname mescan --pkgversion ${SCANCONTROL_SDK_VERSION} --default --fstrans=no ninja install
 
-RUN cd /scanCONTROL-Linux-SDK/libllt && \
-    meson setup build && \
+WORKDIR /scanCONTROL-Linux-SDK/libllt/
+RUN meson setup build && \
     cd build && \
     ninja && \
     checkinstall --pkgname llt --pkgversion ${SCANCONTROL_SDK_VERSION} --default --fstrans=no ninja install
@@ -61,6 +61,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends\
 
 RUN --mount=type=bind,from=build_stage,source=/library_pkgs,target=/library_pkgs \
     apt-get update && \
-    apt-get install /library_pkgs/mescan_${SCANCONTROL_SDK_VERSION}-1_amd64.deb && \
-    apt-get install /library_pkgs/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb \
+    apt-get install -y --no-install-recommends /library_pkgs/mescan_${SCANCONTROL_SDK_VERSION}-1_amd64.deb && \
+    apt-get install -y --no-install-recommends /library_pkgs/llt_${SCANCONTROL_SDK_VERSION}-1_amd64.deb \
     && rm -rf /var/lib/apt/lists/*

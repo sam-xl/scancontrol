@@ -1,5 +1,7 @@
 #include "micro_epsilon_scancontrol_driver/driver.h"
 
+#include <rcpputils/join.hpp>
+
 namespace scancontrol_driver
 {
 ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
@@ -10,8 +12,7 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
   */
 
   // Device settings
-  this->declare_parameter<int>("resolution", -1);
-  this->get_parameter_or("resolution", config_.resolution, -1);
+  this->declare_parameter<int>("resolution", 0);
 
   // Multiple device parameters
   this->declare_parameter<std::string>("serial", std::string(""));
@@ -199,67 +200,14 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
   }
 
   /*
-      Set the resolution of the scanner.
+      Initialize the sensor resolution.
   */
-  // Find all available resolutions
-  {
-    guint resolution_count = 0;
-    guint32 available_resolutions[MAX_RESOLUTION_COUNT];
-    if (auto return_code = device_interface_ptr->GetResolutions(&available_resolutions[0], MAX_RESOLUTION_COUNT);
-        return_code < GENERAL_FUNCTION_OK)
-    {
-      RCLCPP_FATAL_STREAM(
-          this->get_logger(),
-          "Unable to request the available resolutions of the scanCONTROL device. Code: " << return_code);
-      goto stop_initialization;
-    }
-
-    // Select prefered/first found resolution
-    if (config_.resolution > 0)
-    {
-      gint8 selected_resolution = -1;
-      for (int i = 0; i < resolution_count; i++)
-      {
-        std::string resolution = std::to_string(available_resolutions[i]);
-        if (resolution.find(config_.serial) > -1)
-        {
-          selected_resolution = i;
-          break;
-        }
-      }
-      if (selected_resolution == -1)
-      {
-        RCLCPP_WARN_STREAM(this->get_logger(), "Requested resolution of " << std::to_string(config_.resolution)
-                                                                          << " not found as available option.");
-        RCLCPP_WARN(this->get_logger(), "Available resolutions:");
-        for (int i = 0; i < resolution_count; i++)
-        {
-          RCLCPP_WARN_STREAM(this->get_logger(), "   " << std::to_string(available_resolutions[i]));
-        }
-        config_.resolution = available_resolutions[0];
-        RCLCPP_INFO_STREAM(this->get_logger(),
-                           "Selecting first available resolution: " << std::to_string(config_.resolution));
-      }
-    }
-    else
-    {
-      config_.resolution = available_resolutions[0];
-      RCLCPP_INFO_STREAM(this->get_logger(),
-                         "No resolution set, selecting first available: " << std::to_string(config_.resolution));
-    }
-  }
-
-  // Set the selected resolution
-  if (auto return_code = device_interface_ptr->SetResolution(config_.resolution); return_code < GENERAL_FUNCTION_OK)
-  {
-    RCLCPP_FATAL_STREAM(this->get_logger(), "Error while setting device resolution! CodeL " << return_code);
-    goto stop_initialization;
-  }
+  InitResolution();
 
   /*
       Prepare the partial profile
   */
-  if (auto return_code = SetPartialProfile(config_.resolution) < GENERAL_FUNCTION_OK)
+  if (auto return_code = SetPartialProfile(); return_code < GENERAL_FUNCTION_OK)
   {
     goto stop_initialization;
   }
@@ -327,8 +275,78 @@ stop_initialization:
       "~/toggle_laser", std::bind(&ScanControlDriver::ServiceToggleLaserPower, this, _1, _2));
 }
 
-int ScanControlDriver::SetPartialProfile(int& resolution)
+/**
+ * @brief Initializes and applies the scanCONTROL device resolution.
+ *
+ * This function reads the "resolution" parameter from the node, validates it,
+ * retrieves the list of supported resolutions from the device, and selects an
+ * appropriate resolution to apply.
+ *
+ * Resolution selection logic:
+ *  - If the parameter is negative, an error is logged.
+ *  - If the device resolutions cannot be retrieved, a std::runtime_error is thrown.
+ *  - If the parameter is greater than zero, it is checked against the list of
+ *    supported resolutions.
+ *  - If the parameter is zero or not supported, the first available resolution
+ *    from the device is selected as a fallback.
+ *
+ * Once a valid resolution is determined, the function attempts to apply it using
+ * SetResolution(). If this operation fails, a std::runtime_error is thrown.
+ *
+ * Logging:
+ *  - Logs the requested resolution (if > 0).
+ *  - Logs available resolutions when the requested one is unsupported.
+ *  - Logs the final selected resolution before applying it.
+ *
+ * @throws std::runtime_error if resolution retrieval or resolution application fails.
+ */
+void ScanControlDriver::InitResolution()
 {
+  auto resolution = this->get_parameter("resolution").as_int();
+  if (resolution < 0)
+  {
+    RCLCPP_ERROR_STREAM(this->get_logger(),
+                        "Parameter 'resolution' must be non-negative, got " << std::to_string(resolution));
+  }
+
+  auto result = GetResolutions();
+  if (!result)
+  {
+    throw std::runtime_error("Unable to retrieve available resolutions from the scanCONTROL device. Error code: " +
+                             std::to_string(result.error()));
+  }
+
+  const auto& resolutions = *result;
+  if (resolution > 0)
+  {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Requested resolution: " << std::to_string(resolution));
+  }
+
+  const bool supported = std::find(resolutions.begin(), resolutions.end(), resolution) != resolutions.end();
+
+  if (!supported)
+  {
+    RCLCPP_DEBUG_STREAM(this->get_logger(), "Available resolutions: " << rcpputils::join(resolutions, ", ") << ".");
+  }
+
+  if (resolution == 0 || !supported)
+  {
+    resolution = resolutions.front();
+  }
+  RCLCPP_DEBUG_STREAM(this->get_logger(), "Selected Resolution: " + std::to_string(resolution));
+
+  if (auto result = SetResolution(resolution); !result)
+  {
+    throw std::runtime_error("Unable to set resolution. Error code: " + std::to_string(result.error()));
+  }
+
+  this->set_parameter(rclcpp::Parameter("resolution", resolution));
+}
+
+int ScanControlDriver::SetPartialProfile()
+{
+  auto resolution = this->get_parameter("resolution").as_int();
+
   // Set profile configuration to partial profile
   if (auto return_code = device_interface_ptr->SetProfileConfig(PARTIAL_PROFILE); return_code < GENERAL_FUNCTION_OK)
   {
@@ -349,9 +367,8 @@ int ScanControlDriver::SetPartialProfile(int& resolution)
       return_code < GENERAL_FUNCTION_OK)
   {
     // Restore nPointCount to old value
-    t_partial_profile_.nPointCount = (config_.pp_point_count == -1 || config_.pp_point_count > resolution) ?
-                                         config_.resolution :
-                                         config_.pp_point_count;
+    t_partial_profile_.nPointCount =
+        (config_.pp_point_count == -1 || config_.pp_point_count > resolution) ? resolution : config_.pp_point_count;
 
     // Send warning and return failed
     RCLCPP_WARN_STREAM(this->get_logger(), "Error while setting partial profile settings. Code: " << return_code);
@@ -412,16 +429,17 @@ int ScanControlDriver::StopProfileTransfer()
 /* Process raw profile data and create the point cloud message */
 int ScanControlDriver::Profile2PointCloud()
 {
+  auto resolution = this->get_parameter("resolution").as_int();
   int ret_code = device_interface_ptr->ConvertPartProfile2Values(
       &profile_buffer[0], profile_buffer.size(), &t_partial_profile_, device_type, 0, NULL, &maximum_intensity[0],
       &threshold[0], &value_x[0], &value_z[0], NULL, NULL);
-  for (int i = 0; i < config_.resolution; i++)
+  for (int i = 0; i < resolution; i++)
   {
     point_cloud_msg->points[i].x = value_x[i] / 1000;
 
     // Fill in NaN if the scanner is to close or far away (sensor returns ~32.232) and for the final few points which
     // are overwritten by the timestamp data
-    if ((value_z[i] < 32.5) || (i >= config_.resolution - lost_values))
+    if ((value_z[i] < 32.5) || (i >= resolution - lost_values))
     {
       point_cloud_msg->points[i].z = std::numeric_limits<double>::infinity();
     }
@@ -507,6 +525,56 @@ int ScanControlDriver::SetFeature(unsigned int setting_id, unsigned int value)
   return GENERAL_FUNCTION_OK;
 }
 
+/**
+ * @brief Retrieves the list of supported resolutions from the scanCONTROL device.
+ *
+ * This function queries the underlying device interface for all available
+ * resolutions and returns them in a vector. On success, the returned
+ * tl::expected contains a vector whose size corresponds to the number of
+ * resolutions reported by the device. The vector is resized accordingly.
+ *
+ * If the device reports an error (i.e., a return code less than
+ * GENERAL_FUNCTION_OK), the function returns std::unexpected containing the
+ * device's error code. No exceptions are thrown.
+ *
+ * @return tl::expected<std::vector<unsigned int>, int>
+ *         - On success: a vector of available resolutions.
+ *         - On failure: tl::unexpected with the device error code.
+ */
+tl::expected<std::vector<unsigned int>, int> ScanControlDriver::GetResolutions()
+{
+  std::vector<unsigned int> resolutions(MAX_RESOLUTION_COUNT);
+
+  const auto rc = device_interface_ptr->GetResolutions(resolutions.data(), MAX_RESOLUTION_COUNT);
+  if (rc < GENERAL_FUNCTION_OK)
+    return tl::unexpected<int>(rc);
+
+  resolutions.resize(static_cast<std::size_t>(rc));
+  return resolutions;
+}
+
+/**
+ * @brief Set the resolution of the laser line sensor measurement.
+ *
+ * Calls the underlying device interface to set the requested resolution.
+ * If the operation fails (i.e., the return code is less than GENERAL_FUNCTION_OK),
+ * the error code is returned as an unexpected value.
+ *
+ * @param resolution  The desired resolution to configure on the device.
+ *
+ * @return tl::expected<void, int>
+ *         - Success: an empty expected (no value).
+ *         - Failure: tl::unexpected containing the device error code.
+ */
+tl::expected<void, int> ScanControlDriver::SetResolution(int resolution)
+{
+  const auto rc = device_interface_ptr->SetResolution(resolution);
+  if (rc < GENERAL_FUNCTION_OK)
+    return tl::unexpected<int>(rc);
+
+  return {};
+}
+
 /* Wrapper of the SetFeature call for use by the ServiceSetFeature service */
 void ScanControlDriver::ServiceSetFeature(
     const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Request> request,
@@ -538,9 +606,11 @@ void ScanControlDriver::ServiceSetResolution(
   if (response->return_code < GENERAL_FUNCTION_OK)
   {
     RCLCPP_WARN_STREAM(this->get_logger(), "Error while setting device resolution! Code: " << response->return_code);
+    return;
   }
-  int temp_resolution = request->resolution;
-  response->return_code = SetPartialProfile(temp_resolution);
+  this->set_parameter(rclcpp::Parameter("resolution", static_cast<int>(request->resolution)));
+
+  response->return_code = SetPartialProfile();
   if (response->return_code < GENERAL_FUNCTION_OK)
   {
     RCLCPP_WARN_STREAM(this->get_logger(), "Error while setting partial profile. Code: " << response->return_code);
@@ -552,9 +622,6 @@ void ScanControlDriver::ServiceSetResolution(
     RCLCPP_WARN_STREAM(this->get_logger(), "Error while starting transmission! Code: " << response->return_code);
     return;
   }
-
-  // Change of resolution was successful
-  config_.resolution = request->resolution;
 }
 
 /* Wrapper of the GetResolution call for use by the ServiceGetResolution service */

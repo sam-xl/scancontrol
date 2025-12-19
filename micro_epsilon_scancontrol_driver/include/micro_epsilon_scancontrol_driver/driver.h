@@ -15,6 +15,7 @@
 #include <micro_epsilon_scancontrol_msgs/srv/set_feature.hpp>
 #include <micro_epsilon_scancontrol_msgs/srv/set_resolution.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <rcpputils/tl_expected/expected.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <std_srvs/srv/set_bool.hpp>
 #include <string>
@@ -38,7 +39,7 @@ public:
   ~ScanControlDriver() = default;
 
   // Profile functions
-  int SetPartialProfile(int& resolution);
+  int SetPartialProfile();
   int StartProfileTransfer();
   int StopProfileTransfer();
   int ProcessAndPublishProfile(const void* data, size_t data_size);
@@ -48,15 +49,13 @@ public:
   int SetFeature(unsigned int setting_id, unsigned int value);
   int SetDuration(unsigned int setting_id, unsigned int value);
   int GetDuration(unsigned int setting_id, unsigned int* value);
+  tl::expected<std::vector<unsigned int>, int> GetResolutions();
+  tl::expected<void, int> SetResolution(int resolution);
 
   // Get configuration parameters
   std::string serial() const
   {
     return config_.serial;
-  };
-  int resolution() const
-  {
-    return config_.resolution;
   };
 
   // Service Callback
@@ -89,6 +88,8 @@ public:
                                std::shared_ptr<std_srvs::srv::SetBool::Response> response);
 
 private:
+  void InitResolution();
+
   // Profile functions
   int Profile2PointCloud();
   // Configuration storage
@@ -99,7 +100,6 @@ private:
     std::string serial;
     std::string interface;
     std::string topic_name;
-    int resolution;
     int pp_start_point;
     int pp_start_point_data;
     int pp_point_count;

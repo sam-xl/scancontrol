@@ -1,24 +1,33 @@
 <?xml version="1.0"?>
-<package format="2">
+<package format="3">
   <name>micro_epsilon_scancontrol_driver</name>
-  <version>0.0.1</version>
-  <description>Micro Espsilon scanCONTROL sensor driver</description>
-  <maintainer email="r.tonnear@tudelft.nl">Rik Tonnear</maintainer>
+  <version>0.1.0</version>
+  <description>Micro-Epsilon scanCONTROL driver</description>
   <maintainer email="d.kroezen@tudelft.nl">Dave Kroezen</maintainer>
 
   <url type="repository">https://github.com/sam-xl/scancontrol</url>
+  <author>Rik Tonnaer</author>
+  <author>Dave Kroezen</author>
+  <author>Nik Sethi</author>
 
   <license>Apache 2.0</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   
-  <depend>roscpp</depend>
+  <depend>aravis-dev</depend>
+  <depend>libglib-dev</depend>
+
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
+  <depend>rcpputils</depend>
+  <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>pcl_conversions</depend>
   <depend>pcl_ros</depend>
-  <depend>nodelet</depend>
 
   <depend>micro_epsilon_scancontrol_msgs</depend>
-
+  
   <export>
-    <nodelet plugin="${prefix}/me_scancontrol_nodelet.xml"/>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>

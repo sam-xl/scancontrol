@@ -7,16 +7,17 @@ jobs:
     strategy:
       matrix:
         env:
-          - {OS_NAME: ubuntu, OS_CODE_NAME: focal, ROS_DISTRO: noetic, DOCKER_IMAGE: "samxl/scancontrol:sdk_v1.0.0"}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: jammy, ROS_DISTRO: humble, DOCKER_IMAGE: "samxl/scancontrol:humble"}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: noble, ROS_DISTRO: jazzy, DOCKER_IMAGE: "samxl/scancontrol:jazzy"}
     env:
       CCACHE_DIR: /github/home/.ccache
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
-      - uses: actions/cache@v3.3.2
+      - uses: actions/checkout@v6
+      - uses: actions/cache@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ccache-${{ matrix.env.ROS_DISTRO }}-${{ matrix.env.ROS_REPO }}
+          key: ccache-${{ matrix.env.ROS_DISTRO }}
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}
   
@@ -24,9 +25,10 @@ jobs:
     strategy:
       matrix:
         env:
-          - {OS_NAME: ubuntu, OS_CODE_NAME: focal, ROS_DISTRO: noetic, DOCKER_IMAGE: "samxl/scancontrol:sdk_v1.0.0", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '10'}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: jammy, ROS_DISTRO: humble, DOCKER_IMAGE: "samxl/scancontrol:humble", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '14'}
+          - {OS_NAME: ubuntu, OS_CODE_NAME: noble, ROS_DISTRO: jazzy, DOCKER_IMAGE: "samxl/scancontrol:jazzy", CLANG_FORMAT_CHECK: "file",  CLANG_FORMAT_VERSION: '14'}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v6
       - uses: 'ros-industrial/industrial_ci@master'
         env: ${{ matrix.env }}

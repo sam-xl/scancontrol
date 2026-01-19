@@ -1,32 +1,32 @@
-#include <ros/ros.h>
+#include <memory>
+#include <rclcpp/rclcpp.hpp>
 
 #include "micro_epsilon_scancontrol_driver/driver.h"
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "micro_epsilon_scancontrol_driver_node");
-  ros::NodeHandle node;
-  ros::NodeHandle private_nh("~");
+  rclcpp::init(argc, argv);
 
-  // Start the driver
+  rclcpp::executors::SingleThreadedExecutor exec;
+  rclcpp::NodeOptions options;
+
   try
   {
-    scancontrol_driver::ScanControlDriver driver(node, private_nh);
-    ROS_INFO("Driver started");
+    auto driver = std::make_shared<scancontrol_driver::ScanControlDriver>(options);
+    exec.add_node(driver);
 
-    // Loop driver until shutdown
-    driver.StartProfileTransfer();
-    while (ros::ok())
-    {
-      ros::spinOnce();
-    }
-    driver.StopProfileTransfer();
+    driver->StartProfileTransfer();
+    exec.spin();
+
+    driver->StopProfileTransfer();
+    rclcpp::shutdown();
     return 0;
   }
   catch (const std::runtime_error& error)
   {
-    ROS_FATAL_STREAM(error.what());
-    ros::shutdown();
-    return 0;
+    RCLCPP_FATAL_STREAM(rclcpp::get_logger("micro_epsilon_scancontrol_driver"),
+                        "Unable to create driver component. Error: " << error.what());
+    rclcpp::shutdown();
+    return 1;
   }
 }

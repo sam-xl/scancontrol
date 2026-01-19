@@ -1,4 +1,11 @@
 <launch>
-    <!-- Load the Micro Epsilon scanCONTROL driver -->
-    <node name="scancontrol_driver" pkg="micro_epsilon_scancontrol_driver" type="driver_node" output="screen" required="true" />
+    <arg name="frame_id" default="scancontrol_frame"
+        description="The `frame_id` used to publish the profiles/pointcloud data with."/>
+    <arg name="serial" default=""
+        description="Select a specific sensor to connect to by specifying its serial (number). If left empty, the driver will connect to the first found sensor"/>
+
+    <node pkg="micro_epsilon_scancontrol_driver" exec="driver_node" name="scancontrol_driver">
+        <param name="frame_id" value="$(var frame_id)"/>
+        <param name="serial" value="$(var serial)"/>
+    </node>
 </launch>

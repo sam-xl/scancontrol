@@ -3,86 +3,71 @@
 
 ## Overview
 
-ROS device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 0.2]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
+ROS 2 device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 1.0.0]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
 
 **Author: D. Kroezen (GitHub username: dave992)<br />
-Affiliation: [SAM|XL](https://samxl.com/), [TU Delft](https://tudelft.nl/)<br />
+Affiliation: [SAM XL](https://samxl.com/), [TU Delft](https://tudelft.nl/)<br />
 Maintainer: D. Kroezen, d.kroezen@tudelft.nl**
 
-The micro_epsilon_scancontrol package has been tested under [ROS] Melodic and Ubuntu 18.04. 
+The `micro_epsilon_scancontrol` packages have been tested under [ROS 2 Jazzy] & Ubuntu 24.04, and [ROS 2 Humble] & Ubuntu 22.04.
 
 ## Installation
 
 #### Dependencies
 
-- [Aravis 0.6.x](https://github.com/AravisProject/aravis)
-- [scanCONTROL Linux C++ SDK 0.2.4](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
-
-<!-- Note: Optional scripts to (un)install the dependencies can be found [here](). [Password required] -->
-
-<!-- # Micro Epsilon scanCONTROL ROS Driver
-
-## Installation instructions 
-### NOTE: Installation files are not included in this repository! 
-Install dependencies:
-`sudo apt install checkinstall` 
-
-Move to api folder:
-`cd micro_espilon_scancontrol_api/`
-
-Run the install script and follow the instructions in the command window:
-`sudo bash install.sh`
-
-## Uninstal instructions
-### NOTE: Uninstallation files are not included in this repository! 
-Move to the api folder:
-`cd micro_espilon_scancontrol_api/`
-
-Run the uninstall script and follow the instruction in the command window:
-`sudo bash uninstall.sh` -->
+- [Aravis 0.8.x](https://github.com/AravisProject/aravis)
+- [scanCONTROL Linux C++ SDK 1.0.0](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
 
 #### Building
 
-To build from source, clone the latest version from this repository into your catkin workspace and compile the package using:
+To build from source, clone the lastest version from this repository into your workspace:
+```bash
+cd ros_ws/src
+git clone https://github.com/sam-xl/scancontrol.git
+```
 
-	cd catkin_ws/src
-	git clone https://github.com/sam-xl/micro_epsilon_scancontrol.git
-	cd ../
-	catkin build
+Install the dependencies of the cloned packages using rosdep:
+```bash
+cd ros_ws
+rosdep install --from-paths src --ignore-src -y
+```
 
-
-<!-- ### Unit Tests
-
-Run the unit tests with
-
-	catkin_make run_tests_ros_package_template
- -->
+Finally, build all packages in the workspace:
+```bash
+cd ros_ws
+colcon build [--merge-install] [--symlink-install]
+```
 
 ## Usage
 
 Run the main driver node with:
-
-	roslaunch micro_epsilon_scancontrol_driver load_driver.launch
-
-<!-- ## Config files
-
-* **partial_profile.yaml** Configure custom partial profile settings at start-up. The default values only extract the xyz values from the measurement buffer. Adjust at your own risk! 
-	- start_point: 
-	- start_point_data: 
-	- point_count - Number of data points, defaults to -1 (Inherit from resolution)
-	- data_width:  -->
+```bash
+ros2 launch micro_epsilon_scancontrol_driver load_driver.launch
+```
 
 ## Launch files
 
-* **driver.launch:** Launch a single scanCONTROL driver node and the configuration window. 
-<!-- 
-     Arguments
+### `micro_epsilon_scancontrol_driver`
+* **load_driver.launch:** Launch a scanCONTROL driver node that connect to a single device.
+* **test_driver.launch:** Visualize the live measurement data from the driver using RViz. By default uses the `26x0_29x0_25` model.
 
-     - **`show_rqt_plugin`** Display the rqt plugin to reconfigure the sensor on start-up. Default: `true`. -->
+### `micro_epsilon_scancontrol_description`
+* **load_scancontrol_26x0_29x0_25.launch:** Launch a `robot_state_publisher` with the `robot_description` loaded for the `26x0_29x0_25` sensor series.
+* **load_scancontrol_27x0_100.launch:** Launch a `robot_state_publisher` with the `robot_description` loaded for the `27x0_100` sensor series.
+* **load_scancontrol_30xx_25.launch:** Launch a `robot_state_publisher` with the `robot_description` loaded for the `30xx_25` sensor series.
+* **test_scancontrol_26x0_29x0_25.launch:** Visialize the `robot_description` for the `26x0_29x0_25` sensor series.
+* **test_scancontrol_27x0_100.launch:** Visialize the `robot_description` for the `27x0_100` sensor series.
+* **test_scancontrol_30xx_25.launch:** Visialize the `robot_description` for the `30xx_25` sensor series.
+
+### Modifying launch arguments
+To see arguments that may be given to the launch file, run the following command:
+```bash
+ros2 launch <package> <file.launch> --show-args
+```
 
 ## Nodes
 
-### scancontrol_driver_node
+### `scancontrol_driver_node`
 
 The scancontrol_driver_node connects to the scanCONTROL device and allows control of most settings through the provided services. By default the driver only extracts the xyz data from the measurement buffer to create the point cloud message. For now the additional measurement data such as reflections are discarted. 
 
@@ -146,19 +131,13 @@ The following parameters are available to allow using multiple scanCONTROL devic
 	Define a custom name for the measurement frame in which the point clouds are published.
 
 
-
-### scancontrol_driver_nodelet
-
-Encapsulates the same driver class as the scancontrol_driver_node, but instead allows for zero-copy data transfer. The Topics, services and paremeters are the same as described for the scancontrol_driver_node above. 
-
-
 ## Bugs & Feature Requests
 
 Please report bugs and request features using the [Issue Tracker](https://github.com/sam-xl/scancontrol/issues).
 
-
-[ROS]: http://www.ros.org
-[scanCONTROL Linux C++ SDK 0.2]: (https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/)
+[ROS 2 Humble]: https://docs.ros.org/en/humble/index.html
+[ROS 2 Jazzy]: https://docs.ros.org/en/jazzy/index.html
+[scanCONTROL Linux C++ SDK 1.0.0]: https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/
 [sensor_msgs/PointCloud2]: http://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html
 [micro_epsilon_scancontrol_msgs/GetAvailableResolutions]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/GetAvailableResolutions.srv
 [micro_epsilon_scancontrol_msgs/GetFeature]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/GetFeature.srv

@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find-pkg-share micro_epsilon_scancontrol_description)/launch/load_scancontrol_26x0_29x0_25.launch" />
+  <node pkg="rviz2" exec="rviz2" name="rviz2" args="-d $(find-pkg-share micro_epsilon_scancontrol_description)/config/scancontrol_urdf.rviz" />
+</launch>

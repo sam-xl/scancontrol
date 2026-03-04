@@ -82,7 +82,7 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
 
     // Check if the available device is the same as the prefered device (if a serial is provided):
     std::string interface(available_interfaces[0]);
-    if ((config_.serial == "") || (interface.find(config_.serial) > -1))
+    if ((config_.serial == "") || (interface.find(config_.serial) != std::string::npos))
     {
       RCLCPP_INFO_STREAM(this->get_logger(), "Interface found: " << interface);
     }
@@ -103,7 +103,7 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
       for (int i = 0; i < interface_count; i++)
       {
         std::string interface(available_interfaces[i]);
-        if (interface.find(config_.serial) > -1)
+        if (interface.find(config_.serial) != std::string::npos)
         {
           RCLCPP_INFO_STREAM(this->get_logger(), "Interface found: " << interface);
           selected_interface = i;

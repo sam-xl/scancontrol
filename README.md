@@ -3,7 +3,7 @@
 
 ## Overview
 
-ROS 2 device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 1.0.0]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
+ROS 2 device driver for the scanCONTROL series of laser line scanners of Micro Epsilon using the [scanCONTROL Linux C++ SDK 1.0.1]. The driver allows to connect to a (specific) scanCONTROL device, configure the sensor using predefined settings or at runtime and publishes the sensor data as point clouds. 
 
 **Author: D. Kroezen (GitHub username: dave992)<br />
 Affiliation: [SAM XL](https://samxl.com/), [TU Delft](https://tudelft.nl/)<br />
@@ -16,7 +16,7 @@ The `micro_epsilon_scancontrol` packages have been tested under [ROS 2 Jazzy] & 
 #### Dependencies
 
 - [Aravis 0.8.x](https://github.com/AravisProject/aravis)
-- [scanCONTROL Linux C++ SDK 1.0.0](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
+- [scanCONTROL Linux C++ SDK 1.0.1](https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/) 
 
 #### Building
 
@@ -137,7 +137,7 @@ Please report bugs and request features using the [Issue Tracker](https://github
 
 [ROS 2 Humble]: https://docs.ros.org/en/humble/index.html
 [ROS 2 Jazzy]: https://docs.ros.org/en/jazzy/index.html
-[scanCONTROL Linux C++ SDK 1.0.0]: https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/
+[scanCONTROL Linux C++ SDK 1.0.1]: https://www.micro-epsilon.com/2D_3D/laser-scanner/Software/downloads/
 [sensor_msgs/PointCloud2]: http://docs.ros.org/api/sensor_msgs/html/msg/PointCloud2.html
 [micro_epsilon_scancontrol_msgs/GetAvailableResolutions]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/GetAvailableResolutions.srv
 [micro_epsilon_scancontrol_msgs/GetFeature]: https://github.com/sam-xl/scancontrol/blob/master/micro_epsilon_scancontrol_msgs/srv/GetFeature.srv

@@ -43,26 +43,11 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
           for. If 6 devices is insufficient, redefine MAX_LLT_INTERFACE_COUNT to
           accomodate the additional devices.
   */
-  gint32 interface_count = 0;
-  std::vector<char*> available_interfaces(MAX_DEVICE_INTERFACE_COUNT);
-
-  if (auto return_code =
-          device_interface_ptr->GetDeviceInterfaces(&available_interfaces[0], MAX_DEVICE_INTERFACE_COUNT);
-      return_code == ERROR_GETDEVINTERFACE_REQUEST_COUNT)
+  auto available_interfaces = GetDeviceInterfaces();
+  if (!available_interfaces)
   {
-    RCLCPP_WARN_STREAM(this->get_logger(),
-                       "There are more than " << MAX_DEVICE_INTERFACE_COUNT << " scanCONTROL sensors connected.");
-    interface_count = MAX_DEVICE_INTERFACE_COUNT;
-  }
-  else if (return_code < 0)
-  {
-    RCLCPP_WARN_STREAM(this->get_logger(),
-                       "An error occured while searching for connected scanCONTROL devices. Code: " << return_code);
-    interface_count = 0;
-  }
-  else
-  {
-    interface_count = return_code;
+    // Error already logged in GetDeviceInterfaces()
+    throw std::runtime_error("Failed to get available device interfaces.");
   }
 
   /*
@@ -70,18 +55,18 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
           A preffered interface can be set by means of the 'serial' parameter.
   */
   gint8 selected_interface = -1;
-  if (interface_count == 0)
+  if (available_interfaces->empty())
   {
     RCLCPP_WARN(this->get_logger(), "There is no scanCONTROL device connected. Exiting...");
     goto stop_initialization;
   }
-  else if (interface_count == 1)
+  else if (available_interfaces->size() == 1)
   {
     RCLCPP_INFO(this->get_logger(), "There is 1 scanCONTROL device connected.");
     selected_interface = 0;
 
     // Check if the available device is the same as the prefered device (if a serial is provided):
-    std::string interface(available_interfaces[0]);
+    std::string interface((*available_interfaces)[0]);
     if ((config_.serial == "") || (interface.find(config_.serial) != std::string::npos))
     {
       RCLCPP_INFO_STREAM(this->get_logger(), "Interface found: " << interface);
@@ -94,15 +79,15 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
   }
   else
   {
-    RCLCPP_INFO_STREAM(this->get_logger(), "There are " << interface_count << " scanCONTROL devices connected.");
+    RCLCPP_INFO_STREAM(this->get_logger(), "There are " << available_interfaces->size() << " scanCONTROL devices connected.");
 
     // Select prefered device based on the defined ip or serial. If both are set, this selects the device which ip or
     // serial is encountered first.
     if (config_.serial != "")
     {
-      for (int i = 0; i < interface_count; i++)
+      for (int i = 0; i < available_interfaces->size(); i++)
       {
-        std::string interface(available_interfaces[i]);
+        std::string interface((*available_interfaces)[i]);
         if (interface.find(config_.serial) != std::string::npos)
         {
           RCLCPP_INFO_STREAM(this->get_logger(), "Interface found: " << interface);
@@ -115,7 +100,7 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
       {
         RCLCPP_WARN_STREAM(this->get_logger(), "Interface not found! Searched for serial = " << config_.serial);
         RCLCPP_WARN(this->get_logger(), "Available interfaces:");
-        for (gint8 i = 0; i < interface_count; i++)
+        for (gint8 i = 0; i < available_interfaces.size(); i++)
         {
           RCLCPP_WARN_STREAM(this->get_logger(), "   " << available_interfaces[i]);
         }
@@ -341,6 +326,45 @@ void ScanControlDriver::InitResolution()
   }
 
   this->set_parameter(rclcpp::Parameter("resolution", resolution));
+}
+
+/**
+ * @brief Retrieves available scanCONTROL device interfaces.
+ *
+ * Calls the underlying API to enumerate device interface identifiers up to
+ * MAX_DEVICE_INTERFACE_COUNT and converts the returned C-string list into a
+ * std::vector<std::string>.
+ *
+ * For successful calls, the number of interfaces is taken from the API return
+ * value and used to resize the intermediate buffer before conversion.
+ *
+ * @return tl::expected<std::vector<std::string>, int> List of detected interface identifiers or error code.
+ */
+tl::expected<std::vector<std::string>, int> ScanControlDriver::GetDeviceInterfaces()
+{
+  std::vector<char*> interfaces(MAX_DEVICE_INTERFACE_COUNT);
+  gint32 return_code = device_interface_ptr->GetDeviceInterfaces(&interfaces[0], MAX_DEVICE_INTERFACE_COUNT);
+
+  int interface_count = 0;
+  switch (return_code)
+  {
+    case ERROR_GETDEVINTERFACE_REQUEST_COUNT:
+      RCLCPP_ERROR_STREAM(this->get_logger(), "Unable to get interfaces. There are more than " << MAX_DEVICE_INTERFACE_COUNT << " interfaces found. Increase 'MAX_DEVICE_INTERFACE_COUNT' to accomodate more devices or target a specific device via the 'ip' parameter.");
+      return tl::unexpected(return_code);
+    case ERROR_GETDEVINTERFACE_INTERNAL:
+      RCLCPP_ERROR(this->get_logger(), "Internal error occured, returned interface is 'NULL'.");
+      return tl::unexpected(return_code);
+    case ERROR_GENERAL_POINTER_MISSING:
+      RCLCPP_ERROR(this->get_logger(), "Pointer to store the interfaces is 'NULL'.");
+      return tl::unexpected(return_code);
+    default:
+      interface_count = return_code;
+      break;
+  }
+  // resize vector to actual number of interfaces found
+  interfaces.resize(interface_count);
+
+  return std::vector<std::string>(interfaces.begin(), interfaces.end());
 }
 
 int ScanControlDriver::SetPartialProfile()

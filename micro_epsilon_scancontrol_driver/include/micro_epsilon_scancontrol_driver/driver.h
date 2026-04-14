@@ -89,6 +89,7 @@ public:
 
 private:
   void InitResolution();
+  tl::expected<std::vector<std::string>, int> GetDeviceInterfaces();
 
   // Profile functions
   int Profile2PointCloud();

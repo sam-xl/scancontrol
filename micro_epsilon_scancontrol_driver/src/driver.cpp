@@ -15,8 +15,8 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
   this->declare_parameter<int>("resolution", 0);
 
   // Multiple device parameters
-  this->declare_parameter<std::string>("serial", std::string(""));
-  this->get_parameter_or("serial", config_.serial, std::string(""));
+  this->declare_parameter<std::string>("ip", std::string(""));
+  this->get_parameter_or("ip", config_.interface, std::string(""));
   this->declare_parameter<std::string>("frame_id", std::string(DEFAULT_FRAME_ID));
   this->get_parameter_or("frame_id", config_.frame_id, std::string(DEFAULT_FRAME_ID));
   this->declare_parameter<std::string>("topic_name", std::string(DEFAULT_TOPIC_NAME));
@@ -37,96 +37,38 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
 
   /*
       Search for available scanCONTROL interfaces
-          The code only supports a maximum of MAX_LLT_INTERFACE_COUNT (6) devices. If
-          more are connected the devices found after the 6th are not considdered. This
-          is a limitation of the API, which needs a fixed number of devices to search
-          for. If 6 devices is insufficient, redefine MAX_LLT_INTERFACE_COUNT to
-          accomodate the additional devices.
   */
-  auto available_interfaces = GetDeviceInterfaces();
-  if (!available_interfaces)
+  if (config_.interface.empty())
   {
-    // Error already logged in GetDeviceInterfaces()
-    throw std::runtime_error("Failed to get available device interfaces.");
-  }
+    RCLCPP_WARN(this->get_logger(), "No 'ip' parameter set, searching for available scanCONTROL devices...");
+    auto available_interfaces = GetDeviceInterfaces();
+    if (!available_interfaces)
+    {
+      // More specific error already logged in GetDeviceInterfaces()
+      throw std::runtime_error("Failed to get available device interfaces.");
+    }
 
-  /*
-      Select scanCONTROL interface
-          A preffered interface can be set by means of the 'serial' parameter.
-  */
-  gint8 selected_interface = -1;
-  if (available_interfaces->empty())
-  {
-    RCLCPP_WARN(this->get_logger(), "There is no scanCONTROL device connected. Exiting...");
-    goto stop_initialization;
-  }
-  else if (available_interfaces->size() == 1)
-  {
-    RCLCPP_INFO(this->get_logger(), "There is 1 scanCONTROL device connected.");
-    selected_interface = 0;
+    if (available_interfaces->empty())
+    {
+      throw std::runtime_error("No scanCONTROL devices found.");
+    }
 
-    // Check if the available device is the same as the prefered device (if a serial is provided):
-    std::string interface((*available_interfaces)[0]);
-    if ((config_.serial == "") || (interface.find(config_.serial) != std::string::npos))
+    if (available_interfaces->size() > 1)
     {
-      RCLCPP_INFO_STREAM(this->get_logger(), "Interface found: " << interface);
+      RCLCPP_WARN(this->get_logger(),
+                  "Multiple scanCONTROL devices found. Use the 'ip' parameter to specify which device to connect to. "
+                  "Selecting the first available device.");
     }
-    else
-    {
-      RCLCPP_WARN_STREAM(this->get_logger(), "Interface not found! Searched for serial = " << config_.serial);
-      RCLCPP_INFO_STREAM(this->get_logger(), "Selected interface: " << interface);
-    }
-  }
-  else
-  {
-    RCLCPP_INFO_STREAM(this->get_logger(), "There are " << available_interfaces->size() << " scanCONTROL devices connected.");
-
-    // Select prefered device based on the defined ip or serial. If both are set, this selects the device which ip or
-    // serial is encountered first.
-    if (config_.serial != "")
-    {
-      for (int i = 0; i < available_interfaces->size(); i++)
-      {
-        std::string interface((*available_interfaces)[i]);
-        if (interface.find(config_.serial) != std::string::npos)
-        {
-          RCLCPP_INFO_STREAM(this->get_logger(), "Interface found: " << interface);
-          selected_interface = i;
-          break;
-        }
-      }
-      // Fallback if serial are not found:
-      if (selected_interface == -1)
-      {
-        RCLCPP_WARN_STREAM(this->get_logger(), "Interface not found! Searched for serial = " << config_.serial);
-        RCLCPP_WARN(this->get_logger(), "Available interfaces:");
-        for (gint8 i = 0; i < available_interfaces.size(); i++)
-        {
-          RCLCPP_WARN_STREAM(this->get_logger(), "   " << available_interfaces[i]);
-        }
-        selected_interface = 0;
-        RCLCPP_INFO_STREAM(this->get_logger(),
-                           "\nSelecting first available interface: " << available_interfaces[selected_interface]);
-      }
-    }
-    else
-    {
-      selected_interface = 0;
-      RCLCPP_INFO_STREAM(this->get_logger(),
-                         "No 'serial' set, selecting first interface: " << available_interfaces[selected_interface]);
-    }
+    config_.interface = (*available_interfaces)[0];
   }
 
   /*
       Set the selected device to the driver interface class and catch possible errors
   */
-  config_.interface = std::string(available_interfaces[selected_interface]);
-  config_.serial = std::string(config_.interface.end() - 9, config_.interface.end());
-  if (auto return_code = device_interface_ptr->SetDeviceInterface(available_interfaces[selected_interface]);
-      return_code < GENERAL_FUNCTION_OK)
+  RCLCPP_INFO_STREAM(this->get_logger(), "Using scanCONTROL device interface: " << config_.interface);
+  if (gint32 rc = device_interface_ptr->SetDeviceInterface(config_.interface.c_str()); rc < GENERAL_FUNCTION_OK)
   {
-    RCLCPP_FATAL_STREAM(this->get_logger(), "Error while setting device ID! Code: " << return_code);
-    goto stop_initialization;
+    throw std::runtime_error("Error while setting device interface! Code: " + std::to_string(rc));
   }
 
   /*
@@ -141,6 +83,7 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
   /*
       Identify device type and store information on type and serial
   */
+
   if (auto return_code = device_interface_ptr->GetLLTType(&device_type); return_code < GENERAL_FUNCTION_OK)
   {
     RCLCPP_FATAL_STREAM(this->get_logger(), "Error while retrieving device type! Code: " << return_code);
@@ -148,32 +91,27 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
   }
   if (device_type >= scanCONTROL27xx_25 && device_type <= scanCONTROL27xx_xxx)
   {
-    RCLCPP_INFO_STREAM(this->get_logger(),
-                       "The scanCONTROL is a scanCONTROL27xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(this->get_logger(), "The scanCONTROL is a scanCONTROL27xx.");
     config_.model = std::string("scanCONTROL27xx");
   }
   else if (device_type >= scanCONTROL26xx_25 && device_type <= scanCONTROL26xx_xxx)
   {
-    RCLCPP_INFO_STREAM(this->get_logger(),
-                       "The scanCONTROL is a scanCONTROL26xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(this->get_logger(), "The scanCONTROL is a scanCONTROL26xx.");
     config_.model = std::string("scanCONTROL26xx");
   }
   else if (device_type >= scanCONTROL29xx_25 && device_type <= scanCONTROL29xx_xxx)
   {
-    RCLCPP_INFO_STREAM(this->get_logger(),
-                       "The scanCONTROL is a scanCONTROL29xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(this->get_logger(), "The scanCONTROL is a scanCONTROL29xx.");
     config_.model = std::string("scanCONTROL29xx");
   }
   else if (device_type >= scanCONTROL30xx_25 && device_type <= scanCONTROL30xx_xxx)
   {
-    RCLCPP_INFO_STREAM(this->get_logger(),
-                       "The scanCONTROL is a scanCONTROL30xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(this->get_logger(), "The scanCONTROL is a scanCONTROL30xx.");
     config_.model = std::string("scanCONTROL30xx");
   }
   else if (device_type >= scanCONTROL25xx_25 && device_type <= scanCONTROL25xx_xxx)
   {
-    RCLCPP_INFO_STREAM(this->get_logger(),
-                       "The scanCONTROL is a scanCONTROL25xx, with serial number " << config_.serial << ".");
+    RCLCPP_INFO_STREAM(this->get_logger(), "The scanCONTROL is a scanCONTROL25xx.");
     config_.model = std::string("scanCONTROL25xx");
   }
   else
@@ -349,7 +287,11 @@ tl::expected<std::vector<std::string>, int> ScanControlDriver::GetDeviceInterfac
   switch (return_code)
   {
     case ERROR_GETDEVINTERFACE_REQUEST_COUNT:
-      RCLCPP_ERROR_STREAM(this->get_logger(), "Unable to get interfaces. There are more than " << MAX_DEVICE_INTERFACE_COUNT << " interfaces found. Increase 'MAX_DEVICE_INTERFACE_COUNT' to accomodate more devices or target a specific device via the 'ip' parameter.");
+      RCLCPP_ERROR_STREAM(this->get_logger(), "Unable to get interfaces. There are more than "
+                                                  << MAX_DEVICE_INTERFACE_COUNT
+                                                  << " interfaces found. Increase 'MAX_DEVICE_INTERFACE_COUNT' to "
+                                                     "accomodate more devices or target a specific device via the 'ip' "
+                                                     "parameter.");
       return tl::unexpected(return_code);
     case ERROR_GETDEVINTERFACE_INTERNAL:
       RCLCPP_ERROR(this->get_logger(), "Internal error occured, returned interface is 'NULL'.");

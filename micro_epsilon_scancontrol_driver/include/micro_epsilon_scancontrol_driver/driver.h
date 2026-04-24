@@ -52,12 +52,6 @@ public:
   tl::expected<std::vector<unsigned int>, int> GetResolutions();
   tl::expected<void, int> SetResolution(int resolution);
 
-  // Get configuration parameters
-  std::string serial() const
-  {
-    return config_.serial;
-  };
-
   // Service Callback
   void ServiceSetFeature(const std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Request> request,
                          std::shared_ptr<micro_epsilon_scancontrol_msgs::srv::SetFeature::Response> response);
@@ -98,7 +92,6 @@ private:
   {
     std::string frame_id;
     std::string model;
-    std::string serial;
     std::string interface;
     std::string topic_name;
     int pp_start_point;

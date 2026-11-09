@@ -120,7 +120,7 @@ The following parameters are available to allow using multiple scanCONTROL devic
 
 * **`serial`** (string)
 
-	Define a prefered scanCONTROL device by its serial number. If not defined, the driver will try to connect to the first device it is able to find. 
+	Define the scanCONTROL device to connect to by its serial number. If not defined, the driver will try to connect to the first device it is able to find.
 
 * **`topic_name`** (string, default: `scancontrol_pointcloud`)
 

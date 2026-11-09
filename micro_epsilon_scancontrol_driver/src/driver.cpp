@@ -89,6 +89,8 @@ ScanControlDriver::ScanControlDriver(const rclcpp::NodeOptions& options)
     else
     {
       RCLCPP_WARN_STREAM(this->get_logger(), "Interface not found! Searched for serial = " << config_.serial);
+      RCLCPP_WARN(this->get_logger(), "Available interfaces:");
+      RCLCPP_WARN_STREAM(this->get_logger(), "   " << available_interfaces[0]);
       goto stop_initialization;
     }
   }
